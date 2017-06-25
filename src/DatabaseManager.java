@@ -6,6 +6,7 @@ import java.net.URL;
 import java.sql.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class DatabaseManager {
@@ -21,6 +22,9 @@ public class DatabaseManager {
     private static Gson defaultGson = new Gson();
 
     private static AutoUpdateThread autoUpdateThread = null;
+    private static ArrayList<CurrencyObserver> observers = new ArrayList<>();
+
+    private static long lastTid;
 
     public static boolean startConnection(){
         try{
@@ -36,6 +40,8 @@ public class DatabaseManager {
             e.printStackTrace();
             return false;
         }
+
+        lastTid = getLastTidFromDb();
 
         System.out.println("Connection started successfully");
 
@@ -106,7 +112,7 @@ public class DatabaseManager {
         return tmp;
     }
 
-    private static long getLastTid(){
+    private static long getLastTidFromDb(){
         Long since = 0L;
 
         try{
@@ -119,21 +125,9 @@ public class DatabaseManager {
         return since;
     }
 
-    public static Date getLastDate(){
-        Date date = null;
-        try{
-            ResultSet resultSet = defaultConnection.createStatement().executeQuery("SELECT max(date) FROM trades");
-            date = resultSet.getDate(1);
-        } catch(SQLException e) {
-            e.printStackTrace();
-        }
-
-        return date;
-    }
-
     public static boolean updateTradesTable(){
 
-        Long since = getLastTid();
+        Long since = lastTid;
 
         DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
 
@@ -151,6 +145,8 @@ public class DatabaseManager {
             since = trades[trades.length - 1].getTid();
             trades = getEntries(since);
         }
+
+        lastTid = since;
 
         System.out.println("Ended adding new entries");
         return true;
@@ -202,5 +198,15 @@ public class DatabaseManager {
     public static void stopAutoUpdateThread(){
         autoUpdateThread.end();
         autoUpdateThread = null;
+    }
+
+    public static void attachObserver(CurrencyObserver observer){
+        observers.add(observer);
+    }
+
+    public static void notifyAllObservers(){
+        for(CurrencyObserver observer : observers){
+            observer.update();
+        }
     }
 }
