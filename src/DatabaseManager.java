@@ -201,5 +201,6 @@ public class DatabaseManager {
 
     public static void stopAutoUpdateThread(){
         autoUpdateThread.end();
+        autoUpdateThread = null;
     }
 }
