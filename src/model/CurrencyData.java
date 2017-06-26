@@ -8,6 +8,7 @@ public class CurrencyData {
     private Double opening;
     private Double closing;
     private Double average;
+    private Double volume;
     private Date periodStart;
 
     public Double getMinimum() {
@@ -56,5 +57,13 @@ public class CurrencyData {
 
     public void setPeriodStart(Date periodStart) {
         this.periodStart = periodStart;
+    }
+
+    public Double getVolume() {
+        return volume;
+    }
+
+    public void setVolume(Double volume) {
+        this.volume = volume;
     }
 }
