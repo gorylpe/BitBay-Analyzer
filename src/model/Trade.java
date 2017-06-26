@@ -2,7 +2,7 @@ package model;
 
 import java.util.Date;
 
-public class TradeDB {
+public class Trade {
     private Date date;
     private Double price;
     private String type;

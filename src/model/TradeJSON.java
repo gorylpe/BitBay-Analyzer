@@ -7,7 +7,7 @@ public class TradeJSON {
     private Double amount;
     private Long tid;
 
-    public Long getDate() {
+    public Long getUnixTimestamp() {
         return date;
     }
 

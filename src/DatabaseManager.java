@@ -86,7 +86,7 @@ public class DatabaseManager {
         try{
             PreparedStatement preparedStatement = defaultConnection.prepareStatement("INSERT INTO trades VALUES (?, ?, ?, ?, ?)");
             preparedStatement.setLong(1, trade.getTid());
-            preparedStatement.setDate(2, new Date(trade.getDate() * 1000));
+            preparedStatement.setDate(2, new Date(trade.getUnixTimestamp() * 1000));
             preparedStatement.setDouble(3, trade.getPrice());
             preparedStatement.setDouble(4, trade.getAmount());
             preparedStatement.setString(5, trade.getType());
@@ -140,7 +140,7 @@ public class DatabaseManager {
                     break;
             }
 
-            System.out.println("Added " + trades.length + " entries, since " + dateFormat.format(new Date(trades[trades.length - 1].getDate() * 1000)));
+            System.out.println("Added " + trades.length + " entries, since " + dateFormat.format(new Date(trades[trades.length - 1].getUnixTimestamp() * 1000)));
 
             since = trades[trades.length - 1].getTid();
             trades = getEntries(since);
