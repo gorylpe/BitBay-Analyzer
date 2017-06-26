@@ -5,10 +5,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
+import java.util.*;
 
 public class AnalysisManager implements CurrencyObserver{
 
@@ -70,20 +67,23 @@ public class AnalysisManager implements CurrencyObserver{
         ArrayList<Trade> trades = getTradesSince(calendar.getTime());
 
         HashMap<Date, ArrayList<Trade>> daysTrades = new HashMap<>(365);
-        for(int i = 0; i < 365; ++i){
-            daysTrades.put(calendar.getTime(), new ArrayList<>());
-            calendar.add(Calendar.DATE, 1);
-        }
 
         for(int i = 0; i < trades.size(); ++i){
             calendar.setTime(trades.get(i).getDate());
+
+            System.out.println(calendar.getTime() + " price:" + trades.get(i).getPrice());
             //round
             calendar.set(Calendar.MILLISECOND, 0);
             calendar.set(Calendar.SECOND, 0);
             calendar.set(Calendar.MINUTE, 0);
             calendar.set(Calendar.HOUR_OF_DAY, 0);
 
-            daysTrades.get(calendar.getTime()).add(trades.get(i));
+            Date current = calendar.getTime();
+
+            if(daysTrades.get(current) == null)
+                daysTrades.put(current, new ArrayList<>());
+
+            daysTrades.get(current).add(trades.get(i));
         }
 
         calendar.setTime(now);
@@ -91,12 +91,13 @@ public class AnalysisManager implements CurrencyObserver{
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.HOUR_OF_DAY, 0);
+
         calendar.add(Calendar.DATE, -365);
 
-        for(int i = 0; i < 365; ++i){
+        for(int i = 0; i <= 365; ++i, calendar.add(Calendar.DATE, 1)){
             ArrayList<Trade> dayTrades = daysTrades.get(calendar.getTime());
 
-            if(dayTrades.size() == 0){
+            if(dayTrades == null || dayTrades.size() == 0){
                 if(days.size() > 0){
                     CurrencyData currencyData = new CurrencyData();
                     currencyData.setAverage(days.get(i - 1).getClosing());
@@ -117,9 +118,10 @@ public class AnalysisManager implements CurrencyObserver{
                     days.add(currencyData);
                 }
             } else {
+                dayTrades.sort(Comparator.comparing(Trade::getDate));
 
-                double opening = dayTrades.get(dayTrades.size() - 1).getPrice();
-                double closing = dayTrades.get(0).getPrice();
+                double opening = dayTrades.get(0).getPrice();
+                double closing = dayTrades.get(dayTrades.size() - 1).getPrice();
 
                 double minimal = Double.MAX_VALUE;
                 double maximal = Double.MIN_VALUE;
@@ -155,8 +157,6 @@ public class AnalysisManager implements CurrencyObserver{
                                 "Maximum: " + days.get(days.size() - 1).getMaximum() + "zl " +
                                 "Opening: " + days.get(days.size() - 1).getOpening() + "zl " +
                                 "Closing: " + days.get(days.size() - 1).getClosing() + "zl ");
-
-            calendar.add(Calendar.DATE, 1);
         }
     }
 

@@ -11,9 +11,9 @@ public class Main {
 
         DatabaseManager.updateTradesTable();
 
-        DatabaseManager.startAutoUpdateThread(10000);
+        //DatabaseManager.startAutoUpdateThread(10000);
 
-        System.out.println(DatabaseManager.getLastDate());
+        AnalysisManager.initializeDays();
 
         //EventQueue.invokeLater(MainFrame::new);
     }
