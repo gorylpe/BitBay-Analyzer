@@ -2,7 +2,7 @@
 
 public interface ExchangeManager {
     boolean initializeDatabase();
-    boolean update();
+    void update();
     void attachObserver(CurrencyObserver observer);
     void notifyAllObservers();
 
@@ -23,9 +23,7 @@ public interface ExchangeManager {
             System.out.println("Starting autoupdate thread");
 
             while(run){
-                if(!manager.update()){
-                    System.out.println("updating failed");
-                }
+                manager.update();
                 try {
                     Thread.sleep(interval);
                 } catch(InterruptedException e){
