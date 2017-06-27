@@ -1,11 +1,11 @@
 package model;
 
-public class TradeJSON {
+public class BitBayTradeJSON {
+    private Long tid;
     private Long date;
     private Double price;
-    private String type;
     private Double amount;
-    private Long tid;
+    private String type;
 
     public Long getUnixTimestamp() {
         return date;
