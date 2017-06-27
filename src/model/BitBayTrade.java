@@ -1,19 +1,35 @@
 package model;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
-public class Trade {
-    private Date date;
-    private Double price;
-    private String type;
-    private Double amount;
+public class BitBayTrade {
     private Long tid;
+    private LocalDateTime date;
+    private Double price;
+    private Double amount;
+    private String type;
 
-    public Date getDate() {
+    public BitBayTrade(){
+        tid = 0L;
+        date = LocalDateTime.now();
+        price = 0.0;
+        amount = 0.0;
+        type = "";
+    }
+
+    public BitBayTrade(long tid, LocalDateTime date, double price, double amount, String type){
+        this.tid = tid;
+        this.date = date;
+        this.price = price;
+        this.amount = amount;
+        this.type = type;
+    }
+
+    public LocalDateTime getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(LocalDateTime date) {
         this.date = date;
     }
 
