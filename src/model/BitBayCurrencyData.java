@@ -1,15 +1,36 @@
 package model;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
-public class CurrencyData {
+public class BitBayCurrencyData {
     private Double minimum;
     private Double maximum;
     private Double opening;
     private Double closing;
     private Double average;
     private Double volume;
-    private Date periodStart;
+    private LocalDateTime periodStart;
+
+    public BitBayCurrencyData(){
+        minimum = 0.0;
+        maximum = 0.0;
+        opening = 0.0;
+        closing = 0.0;
+        average = 0.0;
+        volume = 0.0;
+        periodStart = LocalDateTime.now();
+    }
+
+    public BitBayCurrencyData(double minimum, double maximum, double opening, double closing, double average, double volume, LocalDateTime periodStart){
+        this.minimum = minimum;
+        this.maximum = maximum;
+        this.opening = opening;
+        this.closing = closing;
+        this.average = average;
+        this.volume = volume;
+        this.periodStart = LocalDateTime.from(periodStart);
+    }
 
     public Double getMinimum() {
         return minimum;
@@ -51,11 +72,11 @@ public class CurrencyData {
         this.average = average;
     }
 
-    public Date getPeriodStart() {
+    public LocalDateTime getPeriodStart() {
         return periodStart;
     }
 
-    public void setPeriodStart(Date periodStart) {
+    public void setPeriodStart(LocalDateTime periodStart) {
         this.periodStart = periodStart;
     }
 
