@@ -6,6 +6,20 @@ public interface ExchangeManager {
     void attachObserver(CurrencyObserver observer);
     void notifyAllObservers();
 
+    enum CurrencyDataPeriodType {
+        DAILY;
+
+        String name;
+
+        CurrencyDataPeriodType(){
+            name = name();
+        }
+
+        String getName(){
+            return name;
+        }
+    }
+
     class AutoUpdateThread extends Thread{
 
         private final ExchangeManager manager;
