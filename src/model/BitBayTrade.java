@@ -64,4 +64,10 @@ public class BitBayTrade {
     public void setTid(Long tid) {
         this.tid = tid;
     }
+
+    @Override
+    public String toString(){
+        return tid + " - " + date + " - " + price + " - " + amount + " - " + type;
+    }
+
 }
