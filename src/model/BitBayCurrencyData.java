@@ -4,13 +4,14 @@ import java.time.LocalDateTime;
 import java.util.Date;
 
 public class BitBayCurrencyData {
+    private LocalDateTime periodStart;
     private Double minimum;
     private Double maximum;
     private Double opening;
     private Double closing;
     private Double average;
     private Double volume;
-    private LocalDateTime periodStart;
+    private String type;
 
     public BitBayCurrencyData(){
         minimum = 0.0;
@@ -22,7 +23,7 @@ public class BitBayCurrencyData {
         periodStart = LocalDateTime.now();
     }
 
-    public BitBayCurrencyData(double minimum, double maximum, double opening, double closing, double average, double volume, LocalDateTime periodStart){
+    public BitBayCurrencyData(double minimum, double maximum, double opening, double closing, double average, double volume, LocalDateTime periodStart, String type){
         this.minimum = minimum;
         this.maximum = maximum;
         this.opening = opening;
@@ -30,6 +31,7 @@ public class BitBayCurrencyData {
         this.average = average;
         this.volume = volume;
         this.periodStart = LocalDateTime.from(periodStart);
+        this.type = type;
     }
 
     public Double getMinimum() {
@@ -86,5 +88,18 @@ public class BitBayCurrencyData {
 
     public void setVolume(Double volume) {
         this.volume = volume;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    @Override
+    public String toString(){
+        return periodStart + " - " + minimum + " - " + maximum + " - " + opening + " - " + closing + " - " + average + " - " + volume;
     }
 }
