@@ -3,7 +3,6 @@
 public interface ExchangeManager {
     boolean initializeDatabase();
     void update();
-    void attachObserver(CurrencyObserver observer);
     void notifyAllObservers();
 
     enum CurrencyDataPeriodType {
