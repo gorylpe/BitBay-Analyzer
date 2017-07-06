@@ -6,7 +6,7 @@ public class DatabaseManager {
     private static final String DRIVER = "org.sqlite.JDBC";
 
     public static Connection startConnection(String DB_URL){
-        Connection connection = null;
+        Connection connection;
         try{
             Class.forName(DRIVER);
         } catch(ClassNotFoundException e){
