@@ -342,24 +342,16 @@ public class BitBayManager implements ExchangeManager {
         updateCurrencyData(TradeType.ETHPLN, CurrencyDataPeriodType.DAILY);
     }
 
-    public ArrayList<BitBayCurrencyData> getCurrencyDataFromPeriod(TradeType tradeType, LocalDateTime periodStart, LocalDateTime periodEnd, CurrencyDataPeriodType periodType){
-        ArrayList<BitBayCurrencyData> currencyDataArray = new ArrayList<>();
-
+    public void currencyDataResultSetToArray(ArrayList<BitBayCurrencyData> currencyDataArray, ResultSet resultSet){
         try {
-            PreparedStatement statement = connection.prepareStatement("SELECT * FROM " + tradeType.getCurrencyDataTableName(periodType) + " WHERE periodStart >= ? AND periodStart <= ? ORDER BY periodStart ASC");
-            statement.setTimestamp(1, Timestamp.valueOf(periodStart));
-            statement.setTimestamp(2, Timestamp.valueOf(periodEnd));
-
-            ResultSet resultSet = statement.executeQuery();
-
             while (resultSet.next()) {
-                LocalDateTime date  = resultSet.getTimestamp(1).toLocalDateTime();
-                double minimum      = resultSet.getDouble(2);
-                double maximum      = resultSet.getDouble(3);
-                double opening      = resultSet.getDouble(4);
-                double closing      = resultSet.getDouble(5);
-                double average      = resultSet.getDouble(6);
-                double volume       = resultSet.getDouble(7);
+                LocalDateTime date = resultSet.getTimestamp(1).toLocalDateTime();
+                double minimum = resultSet.getDouble(2);
+                double maximum = resultSet.getDouble(3);
+                double opening = resultSet.getDouble(4);
+                double closing = resultSet.getDouble(5);
+                double average = resultSet.getDouble(6);
+                double volume = resultSet.getDouble(7);
 
                 BitBayCurrencyData currencyData = new BitBayCurrencyData();
                 currencyData.setPeriodStart(date);
@@ -373,11 +365,48 @@ public class BitBayManager implements ExchangeManager {
                 currencyDataArray.add(currencyData);
             }
         } catch(SQLException e){
+            System.out.println("Error converting result set to arraylist");
+            e.printStackTrace();
+        }
+    }
+
+    public ArrayList<BitBayCurrencyData> getCurrencyDataFromPeriod(TradeType tradeType, LocalDateTime periodStart, LocalDateTime periodEnd, CurrencyDataPeriodType periodType){
+        ArrayList<BitBayCurrencyData> currencyDataArray = new ArrayList<>();
+
+        try {
+            PreparedStatement statement = connection.prepareStatement("SELECT * FROM " + tradeType.getCurrencyDataTableName(periodType) + " WHERE periodStart >= ? AND periodStart <= ? ORDER BY periodStart ASC");
+            statement.setTimestamp(1, Timestamp.valueOf(periodStart));
+            statement.setTimestamp(2, Timestamp.valueOf(periodEnd));
+
+            ResultSet resultSet = statement.executeQuery();
+
+            currencyDataResultSetToArray(currencyDataArray, resultSet);
+
+        } catch(SQLException e){
             System.out.println("Error getting currency data");
             e.printStackTrace();
         }
 
-        System.out.println("Got " + currencyDataArray.size() + " entries from BitBay currency data of type " + periodType.getName());
+        System.out.println("Got " + currencyDataArray.size() + " entries from BitBay currency data of type " + periodType.getName() + " from period " + periodStart + " - " + periodEnd);
+
+        return currencyDataArray;
+    }
+
+    public ArrayList<BitBayCurrencyData> getCurrencyDataAll(TradeType tradeType, CurrencyDataPeriodType periodType) {
+        ArrayList<BitBayCurrencyData> currencyDataArray = new ArrayList<>();
+        try {
+            PreparedStatement statement = connection.prepareStatement("SELECT * FROM " + tradeType.getCurrencyDataTableName(periodType) + " ORDER BY periodStart ASC");
+
+            ResultSet resultSet = statement.executeQuery();
+
+            currencyDataResultSetToArray(currencyDataArray, resultSet);
+
+        } catch (SQLException e) {
+            System.out.println("Error getting currency data");
+            e.printStackTrace();
+        }
+
+        System.out.println("Got all " + currencyDataArray.size() + " entries from BitBay currency data of type " + periodType.getName());
 
         return currencyDataArray;
     }
