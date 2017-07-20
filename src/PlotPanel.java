@@ -3,23 +3,22 @@ import model.BitBayTradeJSON;
 
 import javax.swing.*;
 import java.awt.*;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.time.ZoneId;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Date;
+import java.util.List;
 
-public class PlotPanel extends JPanel {
+public class PlotPanel extends JPanel implements MouseListener, MouseMotionListener{
 
-    ArrayList<BitBayCurrencyData> data;
+    private List<BitBayCurrencyData> data;
 
     public PlotPanel(){
         super();
-        setPreferredSize(new Dimension(1280, 720));
     }
 
-    public void setData(ArrayList<BitBayCurrencyData> data) {
+    public void setData(List<BitBayCurrencyData> data) {
         this.data = data;
     }
 
@@ -32,42 +31,71 @@ public class PlotPanel extends JPanel {
         g2d.setColor(Color.WHITE);
         g2d.drawRect(0, 0, getWidth(), getHeight());
         if(data != null && data.size() > 0){
-            double y0 = data.stream().min(Comparator.comparing(BitBayCurrencyData::getAverage)).get().getAverage() * 0.9;
-            double y1 = data.stream().max(Comparator.comparing(BitBayCurrencyData::getAverage)).get().getAverage() * 1.1;
+            double ymin = data.stream().min(Comparator.comparing(BitBayCurrencyData::getAverage)).get().getMinimum() * 0.95;
+            double ymax = data.stream().max(Comparator.comparing(BitBayCurrencyData::getAverage)).get().getMaximum() * 1.05;
 
             double width = data.size();
-            double height = y1 - y0;
-
-            System.out.println(data.size() + " " + height);
+            double height = ymax - ymin;
 
             g2d.setColor(Color.BLACK);
-            g2d.setStroke(new BasicStroke(2));
+            g2d.setStroke(new BasicStroke(1));
 
-            g2d.drawString(Double.toString(y1), 10, 10);
-            g2d.drawString(Double.toString(y0), 10, getHeight() - 30);
+            final double dx = getWidth() / width;
+            final double dy = getHeight() / height;
 
-            g2d.drawString(data.get(0).getPeriodStart().toString(), 10, getHeight() - 10);
-            g2d.drawString(data.get(data.size() - 1).getPeriodStart().toString(), getWidth() - 100, getHeight() - 10);
-
-            int lastx = 0;
-            int lastAverageY = (int)((y1 - data.get(0).getAverage()) * getHeight() / height);
-
-            final double xscale = getWidth() / width;
-            final double yscale = getHeight() / height;
+            BitBayCurrencyData currencyData = data.get(0);
+            int lastx = (int)(0.5 * dx);
+            int lasty = (int)((ymax - currencyData.getAverage()) * dy);
+            g2d.drawLine(lastx, (int)((ymax - currencyData.getMinimum()) * dy), lastx, (int)((ymax - currencyData.getMaximum()) * dy));
 
             for(int i = 1; i < data.size(); ++i){
-                BitBayCurrencyData currencyData = data.get(i);
-                int x = (int)(i * xscale);
-                int averageY = (int)((y1 - currencyData.getAverage()) * yscale);
+                currencyData = data.get(i);
+                int x = (int)((i + 0.5) * dx);
+                int y = (int)((ymax - currencyData.getAverage()) * dy);
 
                 g2d.setColor(Color.BLACK);
-                g2d.drawLine(lastx, lastAverageY, x, averageY);
+                g2d.drawLine(lastx, lasty, x, y);
                 g2d.setColor(Color.GRAY);
-                g2d.drawLine(x, (int)((y1 - currencyData.getMinimum()) * yscale), x, (int)((y1 - currencyData.getMaximum()) * yscale));
+                g2d.drawLine(x, (int)((ymax - currencyData.getMinimum()) * dy), x, (int)((ymax - currencyData.getMaximum()) * dy));
 
                 lastx = x;
-                lastAverageY = averageY;
+                lasty = y;
             }
         }
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseDragged(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent e) {
+
     }
 }
