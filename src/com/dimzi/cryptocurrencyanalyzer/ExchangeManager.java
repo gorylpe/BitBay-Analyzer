@@ -14,7 +14,7 @@ public interface ExchangeManager {
             name = name();
         }
 
-        String getName(){
+        public String getName(){
             return name;
         }
     }
