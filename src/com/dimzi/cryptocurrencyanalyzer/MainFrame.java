@@ -1,3 +1,6 @@
+package com.dimzi.cryptocurrencyanalyzer;
+
+import com.dimzi.cryptocurrencyanalyzer.BitBay.BitBayWindow;
 import model.BitBayCurrencyData;
 
 import javax.swing.*;

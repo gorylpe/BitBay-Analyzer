@@ -1,4 +1,4 @@
-
+package com.dimzi.cryptocurrencyanalyzer;
 
 public interface ExchangeManager {
     boolean initializeDatabase();

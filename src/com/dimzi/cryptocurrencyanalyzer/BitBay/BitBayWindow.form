@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="BitBayWindow">
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="com.dimzi.cryptocurrencyanalyzer.BitBay.BitBayWindow">
   <grid id="27dc6" binding="panelMain" layout-manager="GridBagLayout">
     <constraints>
-      <xy x="20" y="20" width="732" height="687"/>
+      <xy x="20" y="20" width="732" height="728"/>
     </constraints>
     <properties>
       <background color="-16777216"/>
     </properties>
     <border type="none"/>
     <children>
-      <grid id="c30bb" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-        <margin top="0" left="0" bottom="0" right="0"/>
+      <grid id="c30bb" layout-manager="GridBagLayout">
         <constraints>
           <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
           <gridbag top="1" left="1" bottom="1" right="1" weightx="1.0" weighty="1.0"/>
@@ -20,11 +19,12 @@
         </properties>
         <border type="none"/>
         <children>
-          <component id="add90" class="PlotPanel" binding="plotPanel">
+          <component id="add90" class="com.dimzi.cryptocurrencyanalyzer.BitBay.BitBayPlotPanel" binding="plotPanel">
             <constraints>
               <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
-                <preferred-size width="600" height="600"/>
+                <preferred-size width="800" height="400"/>
               </grid>
+              <gridbag weightx="1.0" weighty="1.0"/>
             </constraints>
             <properties/>
           </component>
@@ -57,14 +57,14 @@
               <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false">
                 <preferred-size width="36" height="58"/>
               </grid>
-              <gridbag weightx="1.0" weighty="0.0"/>
+              <gridbag top="5" left="5" bottom="5" right="5" weightx="1.0" weighty="0.0"/>
             </constraints>
             <properties/>
           </component>
           <component id="7fecc" class="javax.swing.JSpinner" binding="toSpinner">
             <constraints>
               <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-              <gridbag weightx="1.0" weighty="0.0"/>
+              <gridbag top="5" left="5" bottom="5" right="5" weightx="1.0" weighty="0.0"/>
             </constraints>
             <properties/>
           </component>
@@ -88,30 +88,13 @@
               <text value="Label"/>
             </properties>
           </component>
-        </children>
-      </grid>
-      <grid id="ae3f7" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-        <margin top="0" left="0" bottom="0" right="0"/>
-        <constraints>
-          <grid row="0" column="1" row-span="2" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
-          <gridbag top="1" left="1" bottom="1" right="1" weightx="0.0" weighty="0.0"/>
-        </constraints>
-        <properties/>
-        <border type="none"/>
-        <children>
-          <hspacer id="faf03">
+          <component id="b1e8" class="javax.swing.JComboBox" binding="plotTypeComboBox">
             <constraints>
-              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="1" use-parent-layout="false">
-                <minimum-size width="100" height="100"/>
-                <preferred-size width="100" height="100"/>
-              </grid>
+              <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+              <gridbag top="5" left="5" bottom="5" right="5" weightx="0.0" weighty="0.0"/>
             </constraints>
-          </hspacer>
-          <vspacer id="878f1">
-            <constraints>
-              <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-            </constraints>
-          </vspacer>
+            <properties/>
+          </component>
         </children>
       </grid>
     </children>

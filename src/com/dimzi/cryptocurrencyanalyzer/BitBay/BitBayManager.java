@@ -1,3 +1,7 @@
+package com.dimzi.cryptocurrencyanalyzer.BitBay;
+
+import com.dimzi.cryptocurrencyanalyzer.DatabaseManager;
+import com.dimzi.cryptocurrencyanalyzer.ExchangeManager;
 import com.google.gson.Gson;
 import model.BitBayCurrencyData;
 import model.BitBayTrade;
@@ -180,7 +184,7 @@ public class BitBayManager implements ExchangeManager {
     }
 
     private LocalDateTime getLastDateOfCurrencyData(CurrencyDataPeriodType periodType, TradeType type){
-        LocalDateTime minDate = null;
+        LocalDateTime minDate;
 
         try{
             ResultSet resultSet = connection.createStatement().executeQuery("SELECT max(periodStart) FROM " + type.getCurrencyDataTableName(periodType));
@@ -190,7 +194,12 @@ public class BitBayManager implements ExchangeManager {
             } else {
                 try{
                     resultSet = connection.createStatement().executeQuery("SELECT min(date) FROM " + type.getTradesTableName());
-                    minDate = resultSet.getTimestamp(1).toLocalDateTime();
+                    timestamp = resultSet.getTimestamp(1);
+                    if(timestamp != null){
+                        minDate = timestamp.toLocalDateTime();
+                    } else {
+                        minDate = LocalDateTime.now();
+                    }
                 } catch(SQLException e) {
                     e.printStackTrace();
                     return null;

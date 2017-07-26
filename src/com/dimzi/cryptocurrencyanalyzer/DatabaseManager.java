@@ -1,3 +1,4 @@
+package com.dimzi.cryptocurrencyanalyzer;
 
 import java.sql.*;
 

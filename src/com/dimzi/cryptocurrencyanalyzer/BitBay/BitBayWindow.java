@@ -1,20 +1,24 @@
+package com.dimzi.cryptocurrencyanalyzer.BitBay;
+
+import com.dimzi.cryptocurrencyanalyzer.ExchangeManager;
 import model.BitBayCurrencyData;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class BitBayWindow implements BitBayCurrencyObserver {
     private JButton refreshButton;
-    private PlotPanel plotPanel;
+    private BitBayPlotPanel plotPanel;
     private JPanel panelMain;
     private JSpinner fromSpinner;
     private JSpinner toSpinner;
     private JLabel fromLabel;
     private JLabel toLabel;
+    private JComboBox plotTypeComboBox;
 
     private ArrayList<BitBayCurrencyData> data;
 
@@ -30,30 +34,43 @@ public class BitBayWindow implements BitBayCurrencyObserver {
         bitBayManager.updateCurrencyData(BitBayManager.TradeType.ETHPLN, ExchangeManager.CurrencyDataPeriodType.DAILY);
         bitBayManager.notifyAllObservers();
 
-        refreshButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setRange((int) fromSpinner.getValue(), (int) toSpinner.getValue());
-                fromLabel.setText(data.get(rangeStart).getPeriodStart().toString());
-                toLabel.setText(data.get(rangeEnd).getPeriodStart().toString());
-                drawRangedData();
+        refreshButton.addActionListener((ActionEvent e) -> {
+            setRange((int) fromSpinner.getValue(), (int) toSpinner.getValue());
+            drawRangedData();
+        });
+
+        for (BitBayPlotPanel.PlotType type : BitBayPlotPanel.PlotType.values()) {
+            plotTypeComboBox.addItem(type);
+        }
+
+        plotTypeComboBox.addItemListener((ItemEvent e) -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                BitBayPlotPanel.PlotType type = (BitBayPlotPanel.PlotType) e.getItem();
+                plotPanel.setType(type);
             }
         });
+
+        fromSpinner.setValue(0);
+        toSpinner.setValue(50);
+        refreshButton.doClick();
     }
 
     public void setRange(int start, int end) throws NullPointerException {
+        if (start >= data.size()) start = data.size() - 1;
+        if (end >= data.size()) end = data.size() - 1;
         if (start > end) start = end;
         if (start < 0) start = 0;
         if (end < 0) end = 0;
-        if (start >= data.size()) start = data.size() - 1;
-        if (end >= data.size()) end = data.size() - 1;
 
         rangeStart = start;
         rangeEnd = end;
     }
 
     public void drawRangedData() {
-        if (data != null) {
+        if (data != null && data.size() > 0) {
+            fromLabel.setText(data.get(rangeStart).getPeriodStart().toString());
+            toLabel.setText(data.get(rangeEnd).getPeriodStart().toString());
+
             plotPanel.setData(data.subList(rangeStart, rangeEnd + 1));
             plotPanel.repaint();
         }
@@ -98,7 +115,7 @@ public class BitBayWindow implements BitBayCurrencyObserver {
         panelMain.setLayout(new GridBagLayout());
         panelMain.setBackground(new Color(-16777216));
         final JPanel panel1 = new JPanel();
-        panel1.setLayout(new com.intellij.uiDesigner.core.GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
+        panel1.setLayout(new com.intellij.uiDesigner.core.GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), 0, 0));
         panel1.setMinimumSize(new Dimension(600, 600));
         GridBagConstraints gbc;
         gbc = new GridBagConstraints();
@@ -107,10 +124,9 @@ public class BitBayWindow implements BitBayCurrencyObserver {
         gbc.weightx = 1.0;
         gbc.weighty = 1.0;
         gbc.fill = GridBagConstraints.BOTH;
-        gbc.insets = new Insets(1, 1, 1, 1);
         panelMain.add(panel1, gbc);
-        plotPanel = new PlotPanel();
-        panel1.add(plotPanel, new com.intellij.uiDesigner.core.GridConstraints(0, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_BOTH, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, null, new Dimension(600, 600), null, 0, false));
+        plotPanel = new BitBayPlotPanel();
+        panel1.add(plotPanel, new com.intellij.uiDesigner.core.GridConstraints(0, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_BOTH, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_SHRINK | com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_CAN_GROW, null, new Dimension(800, 400), null, 0, false));
         final JPanel panel2 = new JPanel();
         panel2.setLayout(new GridBagLayout());
         gbc = new GridBagConstraints();
@@ -135,6 +151,7 @@ public class BitBayWindow implements BitBayCurrencyObserver {
         gbc.gridy = 0;
         gbc.weightx = 1.0;
         gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(5, 5, 5, 5);
         panel2.add(fromSpinner, gbc);
         toSpinner = new JSpinner();
         gbc = new GridBagConstraints();
@@ -142,6 +159,7 @@ public class BitBayWindow implements BitBayCurrencyObserver {
         gbc.gridy = 1;
         gbc.weightx = 1.0;
         gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(5, 5, 5, 5);
         panel2.add(toSpinner, gbc);
         fromLabel = new JLabel();
         fromLabel.setText("Label");
@@ -158,19 +176,14 @@ public class BitBayWindow implements BitBayCurrencyObserver {
         gbc.gridy = 1;
         gbc.anchor = GridBagConstraints.WEST;
         panel2.add(toLabel, gbc);
-        final JPanel panel3 = new JPanel();
-        panel3.setLayout(new com.intellij.uiDesigner.core.GridLayoutManager(2, 1, new Insets(0, 0, 0, 0), -1, -1));
+        plotTypeComboBox = new JComboBox();
         gbc = new GridBagConstraints();
-        gbc.gridx = 1;
-        gbc.gridy = 0;
-        gbc.gridheight = 2;
-        gbc.fill = GridBagConstraints.BOTH;
-        gbc.insets = new Insets(1, 1, 1, 1);
-        panelMain.add(panel3, gbc);
-        final com.intellij.uiDesigner.core.Spacer spacer1 = new com.intellij.uiDesigner.core.Spacer();
-        panel3.add(spacer1, new com.intellij.uiDesigner.core.GridConstraints(0, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_HORIZONTAL, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, 1, new Dimension(100, 100), new Dimension(100, 100), null, 1, false));
-        final com.intellij.uiDesigner.core.Spacer spacer2 = new com.intellij.uiDesigner.core.Spacer();
-        panel3.add(spacer2, new com.intellij.uiDesigner.core.GridConstraints(1, 0, 1, 1, com.intellij.uiDesigner.core.GridConstraints.ANCHOR_CENTER, com.intellij.uiDesigner.core.GridConstraints.FILL_VERTICAL, 1, com.intellij.uiDesigner.core.GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(5, 5, 5, 5);
+        panel2.add(plotTypeComboBox, gbc);
     }
 
     /**
