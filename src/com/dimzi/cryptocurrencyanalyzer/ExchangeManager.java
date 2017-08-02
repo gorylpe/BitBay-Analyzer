@@ -37,6 +37,8 @@ public interface ExchangeManager {
 
             while(run){
                 manager.update();
+                if(!run)
+                    break;
                 try {
                     Thread.sleep(interval);
                 } catch(InterruptedException e){
@@ -50,6 +52,7 @@ public interface ExchangeManager {
 
             try{
                 run = false;
+                this.interrupt();
                 this.join();
             } catch(InterruptedException e){
                 e.printStackTrace();
