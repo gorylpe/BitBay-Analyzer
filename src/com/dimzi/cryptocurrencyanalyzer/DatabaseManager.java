@@ -6,6 +6,11 @@ public class DatabaseManager {
 
     private static final String DRIVER = "org.sqlite.JDBC";
 
+    /**
+     * Returns connection to database with given database url
+     * @param DB_URL destination database URL
+     * @return connection to database
+     */
     public static Connection startConnection(String DB_URL){
         Connection connection;
         try{
