@@ -120,7 +120,7 @@ public class BitBayManager implements ExchangeManager {
 
     private BitBayTradeJSON[] getTradeEntriesFromServer(TradeType type, Long since){
         try{
-            URL url = new URL(type.getTradesTableName() + since);
+            URL url = new URL(type.getUrl() + since);
             String jsonString = new Scanner(url.openStream()).useDelimiter("\\A").next();
             BitBayTradeJSON[] tmp = gson.fromJson(jsonString, BitBayTradeJSON[].class);
 
