@@ -1,21 +1,37 @@
 package com.dimzi.cryptocurrencyanalyzer;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.function.Function;
+
 public interface ExchangeManager {
-    boolean initializeDatabase();
     void update();
-    void notifyAllObservers();
 
     enum CurrencyDataPeriodType {
-        DAILY;
+        DAILY(  (period) -> period.plusDays(1),
+                (period) -> period.with(LocalTime.of(0, 0)));
 
-        String name;
+        private String name;
+        private Function<LocalDateTime, LocalDateTime> plusFunction;
+        Function<LocalDateTime, LocalDateTime> roundFunction;
 
-        CurrencyDataPeriodType(){
+        CurrencyDataPeriodType(Function<LocalDateTime, LocalDateTime> plusFunction,
+                               Function<LocalDateTime, LocalDateTime> roundFunction){
             name = name();
+            this.plusFunction = plusFunction;
+            this.roundFunction = roundFunction;
         }
 
         public String getName(){
             return name;
+        }
+
+        public LocalDateTime plusPeriod(LocalDateTime localDateTime){
+            return plusFunction.apply(localDateTime);
+        }
+
+        public LocalDateTime roundToPeriodType(LocalDateTime localDateTime){
+            return roundFunction.apply(localDateTime);
         }
     }
 
