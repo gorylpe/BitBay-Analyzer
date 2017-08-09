@@ -31,6 +31,7 @@ public class BitBayPlotPanel extends JPanel implements MouseListener, MouseMotio
     private final Font textFont = new Font("Arial", Font.PLAIN, 12);
 
     private final Color backgroundColor = Color.WHITE;
+    private final Color helpLineColor = new Color(0, 0, 0, 64);
     private final Color averagesColor = new Color(48, 63, 159);
 
     private final Color volumeColor = new Color(66, 165, 255, 64);
@@ -110,14 +111,31 @@ public class BitBayPlotPanel extends JPanel implements MouseListener, MouseMotio
             g2d.setColor(backgroundColor);
             g2d.fillRect(0, 0, getWidth(), getHeight());
 
+            drawHelpLines(g2d);
             drawVolume(g2d, dx, volumeyscale);
-            drawCandles(g2d, dx, valueyscale);
             if(isDrawingAverages)
                 drawAverages(g2d, dx, valueyscale);
+            else
+                drawCandles(g2d, dx, valueyscale);
 
             if(isMouseOver){
                 drawDetailedCurrencyDataInfo(g2d, dx);
             }
+        }
+    }
+
+    private void drawHelpLines(Graphics2D g2d) {
+        g2d.setStroke(new BasicStroke(0.5f));
+        g2d.setColor(helpLineColor);
+
+        int xspace = 75;
+        for(int i = xspace; i < getWidth(); i += xspace){
+            g2d.drawLine(i, 0, i, getHeight());
+        }
+
+        int yspace = 50;
+        for(int i = getHeight() - yspace; i > 0; i -= yspace){
+            g2d.drawLine(0, i, getWidth(), i);
         }
     }
 
@@ -207,6 +225,7 @@ public class BitBayPlotPanel extends JPanel implements MouseListener, MouseMotio
 
         final int currencyX = (int)((coveredDataIndex + 0.5) * dx) - 1;
 
+        g2d.setStroke(new BasicStroke(1.5f));
         g2d.setColor(Color.GRAY);
         g2d.drawLine(currencyX, 0, currencyX, getHeight());
 
@@ -216,7 +235,9 @@ public class BitBayPlotPanel extends JPanel implements MouseListener, MouseMotio
 
         float horizontalLineFontSize = (getWidth() > getHeight() ? getHeight() / 25.0f : getWidth() / 25.0f);
         g2d.setFont(textFont.deriveFont(horizontalLineFontSize));
-        g2d.drawString(String.format("%.2f", yvalueAtMousePos), getWidth() - horizontalLineFontSize * 3, mouseY);
+
+        String formattedYvalue = String.format("%.2f", yvalueAtMousePos);
+        g2d.drawString(formattedYvalue, getWidth() - horizontalLineFontSize * formattedYvalue.length() * 2 / 3, mouseY);
         g2d.drawString(String.format("%.2f", yvolumeAtMousePos), 10, mouseY);
 
         //dialog drawing
@@ -229,9 +250,8 @@ public class BitBayPlotPanel extends JPanel implements MouseListener, MouseMotio
         if(dialogY + height > getHeight())dialogY = getHeight() - height;
 
         g2d.setColor(detailsBackgroundColor);
-        g2d.setStroke(new BasicStroke(1.0f));
         g2d.fillRoundRect(dialogX, dialogY, width, height, 10, 10);
-        g2d.setColor(Color.BLACK);
+        g2d.setColor(Color.GRAY);
         g2d.drawRoundRect(dialogX, dialogY, width, height, 10, 10);
 
         String dayOfWeek = currencyData.getPeriodStart().toLocalDate().getDayOfWeek().name();
