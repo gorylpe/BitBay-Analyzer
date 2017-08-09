@@ -1,5 +1,6 @@
 package com.dimzi.cryptocurrencyanalyzer.BitBay;
 
+import com.dimzi.cryptocurrencyanalyzer.CurrencyObserver;
 import com.dimzi.cryptocurrencyanalyzer.DatabaseManager;
 import com.dimzi.cryptocurrencyanalyzer.ExchangeManager;
 import com.google.gson.Gson;
@@ -80,7 +81,7 @@ public enum BitBayManager implements ExchangeManager {
     }
 
     private AutoUpdateThread autoUpdateThread = null;
-    private ArrayList<BitBayCurrencyObserver> observers = new ArrayList<>();
+    private ArrayList<CurrencyObserver> observers = new ArrayList<>();
 
     private Connection connection;
     private Gson gson;
@@ -429,8 +430,8 @@ public enum BitBayManager implements ExchangeManager {
         boolean change = updateTrades(TradeType.ETHPLN);
         if(change){
             updateCurrencyData(TradeType.ETHPLN, CurrencyDataPeriodType.DAILY);
+            notifyAllObservers();
         }
-        notifyAllObservers();
     }
 
     public ArrayList<BitBayCurrencyData> getCurrencyData(TradeType tradeType, CurrencyDataPeriodType periodType){
@@ -453,16 +454,16 @@ public enum BitBayManager implements ExchangeManager {
         autoUpdateThread = null;
     }
 
-    public void attachObserver(BitBayCurrencyObserver observer){
+    public void attachObserver(CurrencyObserver observer){
         System.out.println("Adding observer " + observer.getClass().getName());
         observers.add(observer);
     }
 
     public void notifyAllObservers(){
         System.out.println("Notifying all BitBay observers");
-        for(BitBayCurrencyObserver observer : observers){
+        for(CurrencyObserver observer : observers){
             System.out.println("Notifying observer " + observer.getClass().getName());
-            observer.update(this);
+            observer.update();
         }
     }
 }

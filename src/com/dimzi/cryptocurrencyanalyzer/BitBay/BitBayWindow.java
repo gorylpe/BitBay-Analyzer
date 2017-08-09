@@ -1,17 +1,17 @@
 package com.dimzi.cryptocurrencyanalyzer.BitBay;
 
+import com.dimzi.cryptocurrencyanalyzer.CurrencyObserver;
 import com.dimzi.cryptocurrencyanalyzer.ExchangeManager;
 import model.BitBayCurrencyData;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BitBayWindow implements BitBayCurrencyObserver {
+public class BitBayWindow implements CurrencyObserver {
     private BitBayPlotPanel plotPanel;
     private JPanel panelMain;
     private JSpinner startSpinner;
@@ -110,10 +110,10 @@ public class BitBayWindow implements BitBayCurrencyObserver {
     }
 
     @Override
-    public void update(BitBayManager manager) {
+    public void update() {
         System.out.println("BitBayWindow updating");
 
-        currencyData = manager.getCurrencyData(
+        currencyData = BitBayManager.INSTANCE.getCurrencyData(
                 BitBayManager.TradeType.ETHPLN,
                 ExchangeManager.CurrencyDataPeriodType.DAILY);
 
