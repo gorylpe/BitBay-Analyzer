@@ -22,19 +22,24 @@ public enum BitBayManager implements ExchangeManager {
     private final String DB_URL = "jdbc:sqlite:bitbay.db";
 
     public enum TradeType{
-        ETHPLN;
+        ETHPLN("ETH", "PLN");
 
         private String name;
+        private String firstCurrency;
+        private String secondCurrency;
         private String url;
 
         private Map<CurrencyDataPeriodType, ArrayList<BitBayCurrencyData>> currencyDataMap;
         private Map<CurrencyDataPeriodType, BitBayCurrencyData> currentCurrencyDataMap;
 
-        TradeType(){
-            name = name();
+        TradeType(String firstCurrency, String secondCurrency){
+            this.name = name();
             this.url = "https://bitbay.net/API/Public/" + name + "/trades.json?sort=asc&since=";
-            currencyDataMap = Collections.synchronizedMap(new EnumMap<CurrencyDataPeriodType, ArrayList<BitBayCurrencyData>>(CurrencyDataPeriodType.class));
-            currentCurrencyDataMap = Collections.synchronizedMap(new EnumMap<CurrencyDataPeriodType, BitBayCurrencyData>(CurrencyDataPeriodType.class));
+            this.currencyDataMap = Collections.synchronizedMap(new EnumMap<CurrencyDataPeriodType, ArrayList<BitBayCurrencyData>>(CurrencyDataPeriodType.class));
+            this.currentCurrencyDataMap = Collections.synchronizedMap(new EnumMap<CurrencyDataPeriodType, BitBayCurrencyData>(CurrencyDataPeriodType.class));
+
+            this.firstCurrency = firstCurrency;
+            this.secondCurrency = secondCurrency;
         }
 
         private String getUrl(){
@@ -63,6 +68,14 @@ public enum BitBayManager implements ExchangeManager {
 
         private BitBayCurrencyData getCurrentCurrencyData(CurrencyDataPeriodType periodType){
             return currentCurrencyDataMap.get(periodType);
+        }
+
+        public String getFirstCurrency() {
+            return firstCurrency;
+        }
+
+        public String getSecondCurrency() {
+            return secondCurrency;
         }
     }
 
