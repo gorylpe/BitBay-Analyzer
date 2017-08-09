@@ -1,30 +1,40 @@
 package com.dimzi.cryptocurrencyanalyzer;
 
+import com.dimzi.cryptocurrencyanalyzer.BitBay.BitBayManager;
 import com.dimzi.cryptocurrencyanalyzer.BitBay.BitBayWindow;
-import model.BitBayCurrencyData;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.sql.SQLException;
-import java.util.ArrayList;
 
-public class MainFrame extends JFrame {
+public class MainFrame extends JFrame implements ActionListener{
 
     public MainFrame(){
         super("BitBay Analyzer");
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
-        try {
-            BitBayWindow bitBayWindow = new BitBayWindow();
-            setContentPane(bitBayWindow.getPanelMain());
-        } catch (SQLException e){
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Error creating bitbaywindow");
-        }
+        setLayout(new BorderLayout());
+
+        JMenuBar menuBar = new JMenuBar();
+
+        JMenuItem managersButton = new JMenuItem("Managers");
+        managersButton.addActionListener((ActionEvent e) -> {
+
+        });
+
+        JMenu viewsMenu = new JMenu("Views");
+
+        BitBayWindow bitBayWindow = new BitBayWindow();
+        setContentPane(bitBayWindow.getPanelMain());
 
         setVisible(true);
         pack();
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+
     }
 }
