@@ -13,39 +13,58 @@ import java.sql.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.*;
 import java.util.Date;
 
-public class BitBayManager implements ExchangeManager {
+public enum BitBayManager implements ExchangeManager {
+    INSTANCE;
 
     private final String DB_URL = "jdbc:sqlite:bitbay.db";
 
     public enum TradeType{
         ETHPLN;
 
-        String name;
-        String url;
+        private String name;
+        private String url;
+
+        private Map<CurrencyDataPeriodType, ArrayList<BitBayCurrencyData>> currencyDataMap;
+        private Map<CurrencyDataPeriodType, BitBayCurrencyData> currentCurrencyDataMap;
 
         TradeType(){
             name = name();
             this.url = "https://bitbay.net/API/Public/" + name + "/trades.json?sort=asc&since=";
+            currencyDataMap = Collections.synchronizedMap(new EnumMap<CurrencyDataPeriodType, ArrayList<BitBayCurrencyData>>(CurrencyDataPeriodType.class));
+            currentCurrencyDataMap = Collections.synchronizedMap(new EnumMap<CurrencyDataPeriodType, BitBayCurrencyData>(CurrencyDataPeriodType.class));
         }
 
-        String getUrl(){
+        private String getUrl(){
             return url;
         }
 
-        String getTradesTableName(){
+        private String getTradesTableName(){
             return name + "_TRADES";
         }
 
-        String getCurrencyDataTableName(CurrencyDataPeriodType currencyDataPeriodType){
-            return name + "_" + currencyDataPeriodType.getName();
+        private String getCurrencyDataTableName(CurrencyDataPeriodType periodType){
+            return name + "_" + periodType.getName();
+        }
+
+        private void setCurrencyData(CurrencyDataPeriodType periodType, ArrayList<BitBayCurrencyData> currencyDataArrayList){
+            currencyDataMap.put(periodType, currencyDataArrayList);
+        }
+
+        private ArrayList<BitBayCurrencyData> getCurrencyData(CurrencyDataPeriodType periodType){
+            return currencyDataMap.get(periodType);
+        }
+
+        private void setCurrentCurrencyData(CurrencyDataPeriodType periodType, BitBayCurrencyData currencyData){
+            currentCurrencyDataMap.put(periodType, currencyData);
+        }
+
+        private BitBayCurrencyData getCurrentCurrencyData(CurrencyDataPeriodType periodType){
+            return currentCurrencyDataMap.get(periodType);
         }
     }
-
-    private BitBayCurrencyData currentDailyCurrencyData;
 
     private AutoUpdateThread autoUpdateThread = null;
     private ArrayList<BitBayCurrencyObserver> observers = new ArrayList<>();
@@ -53,21 +72,31 @@ public class BitBayManager implements ExchangeManager {
     private Connection connection;
     private Gson gson;
 
-    public BitBayManager() throws SQLException{
+    BitBayManager(){
         connection = DatabaseManager.startConnection(DB_URL);
 
         if(connection == null){
-            throw new SQLException("Connection not initialized");
+            throw new RuntimeException("BitBayManager: Connection not initialized");
         }
 
         if(!initializeDatabase()){
-            throw new SQLException("Database not initialized");
+            throw new RuntimeException("BitBayManager: Database not initialized");
         }
+
+        initializeMaps();
 
         gson = new Gson();
     }
 
-    public boolean initializeDatabase(){
+    private void initializeMaps() {
+        for(TradeType tradeType : TradeType.values()){
+            for(CurrencyDataPeriodType periodType : CurrencyDataPeriodType.values()){
+                tradeType.setCurrencyData(periodType, getCurrencyDataAll(tradeType, periodType));
+            }
+        }
+    }
+
+    private boolean initializeDatabase(){
         Statement statement;
 
         try{
@@ -152,7 +181,7 @@ public class BitBayManager implements ExchangeManager {
         return trade;
     }
 
-    public void updateTrades(TradeType type){
+    private boolean updateTrades(TradeType type){
         Long since = getLastTrade(type).getTid();
 
         DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
@@ -177,10 +206,14 @@ public class BitBayManager implements ExchangeManager {
             trades = getTradeEntriesFromServer(type, since);
         }
 
+        boolean change = false;
+
         if(totalAddedTrades > 0){
             System.out.println("Added total " + totalAddedTrades + " trades");
-            this.notifyAllObservers();
+            change = true;
         }
+
+        return change;
     }
 
     private LocalDateTime getLastDateOfCurrencyData(CurrencyDataPeriodType periodType, TradeType type){
@@ -216,14 +249,7 @@ public class BitBayManager implements ExchangeManager {
     private BitBayCurrencyData tradesToCurrencyData(LocalDateTime periodStart, BitBayCurrencyData previousCurrencyData, CurrencyDataPeriodType periodType, TradeType tradeType) throws SQLException{
         BitBayCurrencyData currencyData;
 
-        LocalDateTime periodEnd = LocalDateTime.from(periodStart);
-        switch (periodType){
-            case DAILY:
-                periodEnd = periodEnd.plusDays(1);
-                break;
-            default:
-                return null;
-        }
+        LocalDateTime periodEnd = periodType.plusPeriod(LocalDateTime.from(periodStart));
 
         PreparedStatement statement = connection.prepareStatement("SELECT * FROM " + tradeType.getTradesTableName() + " WHERE date >= ? AND date < ? ORDER BY date ASC");
         statement.setTimestamp(1, Timestamp.valueOf(periodStart));
@@ -286,22 +312,13 @@ public class BitBayManager implements ExchangeManager {
         return currencyData;
     }
 
-    private LocalDateTime roundToPeriodType(CurrencyDataPeriodType periodType, LocalDateTime localDateTime){
-        switch(periodType){
-            case DAILY:
-                localDateTime = localDateTime.with(LocalTime.of(0, 0));
-                break;
-        }
-        return localDateTime;
-    }
-
-    public void updateCurrencyData(TradeType tradeType, CurrencyDataPeriodType periodType) {
+    private void updateCurrencyData(TradeType tradeType, CurrencyDataPeriodType periodType) {
 
         LocalDateTime newest = getLastTrade(tradeType).getDate();
-        newest = roundToPeriodType(periodType, newest);
+        newest = periodType.roundToPeriodType(newest);
 
         LocalDateTime lastCurrencyDataDate = getLastDateOfCurrencyData(periodType, tradeType);
-        lastCurrencyDataDate = roundToPeriodType(periodType, lastCurrencyDataDate);
+        lastCurrencyDataDate = periodType.roundToPeriodType(lastCurrencyDataDate);
 
         int totalAddedCurrencyData = 0;
 
@@ -324,11 +341,12 @@ public class BitBayManager implements ExchangeManager {
 
         if(totalAddedCurrencyData > 0){
             System.out.println("Total currency data added " + totalAddedCurrencyData);
+            tradeType.setCurrencyData(periodType, getCurrencyDataAll(tradeType, periodType));
         }
 
         //update current data
         try{
-            currentDailyCurrencyData = tradesToCurrencyData(newest, lastCurrencyData, periodType, tradeType);
+            tradeType.setCurrentCurrencyData(periodType, tradesToCurrencyData(newest, lastCurrencyData, periodType, tradeType));
         } catch(SQLException e){
             e.printStackTrace();
         }
@@ -346,12 +364,7 @@ public class BitBayManager implements ExchangeManager {
         preparedStatement.execute();
     }
 
-    public void update(){
-        updateTrades(TradeType.ETHPLN);
-        updateCurrencyData(TradeType.ETHPLN, CurrencyDataPeriodType.DAILY);
-    }
-
-    public void currencyDataResultSetToArray(ArrayList<BitBayCurrencyData> currencyDataArray, ResultSet resultSet){
+    private void currencyDataResultSetToArray(ArrayList<BitBayCurrencyData> currencyDataArray, ResultSet resultSet){
         try {
             while (resultSet.next()) {
                 LocalDateTime date = resultSet.getTimestamp(1).toLocalDateTime();
@@ -379,29 +392,7 @@ public class BitBayManager implements ExchangeManager {
         }
     }
 
-    public ArrayList<BitBayCurrencyData> getCurrencyDataFromPeriod(TradeType tradeType, LocalDateTime periodStart, LocalDateTime periodEnd, CurrencyDataPeriodType periodType){
-        ArrayList<BitBayCurrencyData> currencyDataArray = new ArrayList<>();
-
-        try {
-            PreparedStatement statement = connection.prepareStatement("SELECT * FROM " + tradeType.getCurrencyDataTableName(periodType) + " WHERE periodStart >= ? AND periodStart <= ? ORDER BY periodStart ASC");
-            statement.setTimestamp(1, Timestamp.valueOf(periodStart));
-            statement.setTimestamp(2, Timestamp.valueOf(periodEnd));
-
-            ResultSet resultSet = statement.executeQuery();
-
-            currencyDataResultSetToArray(currencyDataArray, resultSet);
-
-        } catch(SQLException e){
-            System.out.println("Error getting currency data");
-            e.printStackTrace();
-        }
-
-        System.out.println("Got " + currencyDataArray.size() + " entries from BitBay currency data of type " + periodType.getName() + " from period " + periodStart + " - " + periodEnd);
-
-        return currencyDataArray;
-    }
-
-    public ArrayList<BitBayCurrencyData> getCurrencyDataAll(TradeType tradeType, CurrencyDataPeriodType periodType) {
+    private ArrayList<BitBayCurrencyData> getCurrencyDataAll(TradeType tradeType, CurrencyDataPeriodType periodType) {
         ArrayList<BitBayCurrencyData> currencyDataArray = new ArrayList<>();
         try {
             PreparedStatement statement = connection.prepareStatement("SELECT * FROM " + tradeType.getCurrencyDataTableName(periodType) + " ORDER BY periodStart ASC");
@@ -418,6 +409,23 @@ public class BitBayManager implements ExchangeManager {
         System.out.println("Got all " + currencyDataArray.size() + " entries from BitBay currency data of type " + periodType.getName());
 
         return currencyDataArray;
+    }
+
+    @Override
+    public void update(){
+        boolean change = updateTrades(TradeType.ETHPLN);
+        if(change){
+            updateCurrencyData(TradeType.ETHPLN, CurrencyDataPeriodType.DAILY);
+        }
+        notifyAllObservers();
+    }
+
+    public ArrayList<BitBayCurrencyData> getCurrencyData(TradeType tradeType, CurrencyDataPeriodType periodType){
+        return tradeType.getCurrencyData(periodType);
+    }
+
+    public BitBayCurrencyData getCurrentCurrencyData(TradeType tradeType, CurrencyDataPeriodType periodType){
+        return tradeType.getCurrentCurrencyData(periodType);
     }
 
     public void startAutoUpdateThread(final long interval){
