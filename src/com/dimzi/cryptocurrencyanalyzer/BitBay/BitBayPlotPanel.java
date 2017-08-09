@@ -13,6 +13,7 @@ import java.util.List;
 public class BitBayPlotPanel extends JPanel implements MouseListener, MouseMotionListener{
 
     private List<BitBayCurrencyData> data;
+    private BitBayManager.TradeType tradeType;
     private double valueRangeSize;
     private double valueMin;
     private double valueMax;
@@ -64,9 +65,13 @@ public class BitBayPlotPanel extends JPanel implements MouseListener, MouseMotio
         valueMax = data.stream().max(Comparator.comparing(BitBayCurrencyData::getMaximum)).get().getMaximum() * 1.05;
         valueRangeSize = valueMax - valueMin;
 
-        volumeMin = data.stream().min(Comparator.comparing(BitBayCurrencyData::getVolume)).get().getVolume();
+        volumeMin = 0;
         volumeMax = data.stream().max(Comparator.comparing(BitBayCurrencyData::getVolume)).get().getVolume() * 1.25;
         volumeRangeSize = volumeMax - volumeMin;
+    }
+
+    public void setTradeType(BitBayManager.TradeType tradeType){
+        this.tradeType = tradeType;
     }
 
 
@@ -137,6 +142,16 @@ public class BitBayPlotPanel extends JPanel implements MouseListener, MouseMotio
         for(int i = getHeight() - yspace; i > 0; i -= yspace){
             g2d.drawLine(0, i, getWidth(), i);
         }
+
+        float horizontalLineFontSize = (getWidth() > getHeight() ? getHeight() / 25.0f : getWidth() / 25.0f);
+        g2d.setFont(textFont.deriveFont(horizontalLineFontSize));
+
+        String formattedMaxValue = String.format("%.2f %s", valueMax, tradeType.getSecondCurrency());
+        String formattedMinValue = String.format("%.2f %s", valueMax, tradeType.getSecondCurrency());
+        g2d.drawString(String.format("%.2f %s", valueMax, tradeType.getSecondCurrency()), getWidth() - horizontalLineFontSize * (formattedMaxValue.length() - 1) * 2 / 3, horizontalLineFontSize);
+        g2d.drawString(String.format("%.2f %s", valueMin, tradeType.getSecondCurrency()), getWidth() - horizontalLineFontSize * (formattedMinValue.length() - 1) * 2 / 3, getHeight() - horizontalLineFontSize / 2);
+        g2d.drawString(String.format("%.2f %s", volumeMax, tradeType.getFirstCurrency()), 5, horizontalLineFontSize);
+        g2d.drawString(String.format("%.2f %s", volumeMin, tradeType.getFirstCurrency()), 5, getHeight() - horizontalLineFontSize / 2);
     }
 
     private void drawAverages(Graphics2D g2d, final double dx, final double yscale){
@@ -236,9 +251,9 @@ public class BitBayPlotPanel extends JPanel implements MouseListener, MouseMotio
         float horizontalLineFontSize = (getWidth() > getHeight() ? getHeight() / 25.0f : getWidth() / 25.0f);
         g2d.setFont(textFont.deriveFont(horizontalLineFontSize));
 
-        String formattedYvalue = String.format("%.2f", yvalueAtMousePos);
-        g2d.drawString(formattedYvalue, getWidth() - horizontalLineFontSize * formattedYvalue.length() * 2 / 3, mouseY);
-        g2d.drawString(String.format("%.2f", yvolumeAtMousePos), 10, mouseY);
+        String formattedYvalue = String.format("%.2f %s", yvalueAtMousePos, tradeType.getSecondCurrency());
+        g2d.drawString(formattedYvalue, getWidth() - horizontalLineFontSize * (formattedYvalue.length() - 1) * 2 / 3, mouseY);
+        g2d.drawString(String.format("%.2f %s", yvolumeAtMousePos, tradeType.getFirstCurrency()), 5, mouseY);
 
         //dialog drawing
         int dialogX = mouseX - width * 11 / 10;
