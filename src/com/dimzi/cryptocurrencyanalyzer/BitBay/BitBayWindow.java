@@ -19,6 +19,7 @@ public class BitBayWindow implements BitBayCurrencyObserver {
     private JLabel rangeLabel;
     private JCheckBox averagesCheckBox;
     private JCheckBox lastCheckBox;
+    private BitBaySelectionPanel selectionPanel;
 
     private ArrayList<BitBayCurrencyData> currencyData;
 
@@ -63,8 +64,11 @@ public class BitBayWindow implements BitBayCurrencyObserver {
     }
 
     private void refresh() {
-        if (currencyData != null)
+        if (currencyData != null) {
             setRange((int) startSpinner.getValue(), (int) rangeSpinner.getValue(), lastCheckBox.isSelected());
+            plotPanel.setTradeType(BitBayManager.TradeType.ETHPLN);
+            selectionPanel.setData(currencyData);
+        }
     }
 
     /**
@@ -91,6 +95,9 @@ public class BitBayWindow implements BitBayCurrencyObserver {
 
         plotPanel.setData(rangedData);
         plotPanel.repaint();
+
+        selectionPanel.setRange(start, end + 1);
+        selectionPanel.repaint();
     }
 
     /**
@@ -228,8 +235,16 @@ public class BitBayWindow implements BitBayCurrencyObserver {
         gbc.gridwidth = 2;
         gbc.weightx = 1.0;
         gbc.fill = GridBagConstraints.BOTH;
-        gbc.insets = new Insets(1, 1, 1, 1);
+        gbc.insets = new Insets(5, 5, 5, 5);
         panelMain.add(panel3, gbc);
+        selectionPanel = new BitBaySelectionPanel();
+        gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.weightx = 1.0;
+        gbc.weighty = 1.0;
+        gbc.fill = GridBagConstraints.BOTH;
+        panel3.add(selectionPanel, gbc);
     }
 
     /**
