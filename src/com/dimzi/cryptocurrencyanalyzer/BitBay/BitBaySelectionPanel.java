@@ -4,13 +4,16 @@ import model.BitBayCurrencyData;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.util.Comparator;
 import java.util.List;
 
 /**
  * Created by Piotr on 07.08.2017.
  */
-public class BitBaySelectionPanel extends JPanel {
+public class BitBaySelectionPanel extends JPanel implements MouseMotionListener, MouseListener, BitBaySelectionListener {
     private List<BitBayCurrencyData> data;
     private double valueRangeSize;
     private double valueMin;
@@ -19,7 +22,22 @@ public class BitBaySelectionPanel extends JPanel {
     private int rangeStart;
     private int rangeEnd;
 
+    private final Color selectionColor = new Color(0, 255, 0, 64);
+    private final Color draggingColor = new Color(255, 255, 0, 64);
+
+    private int lastX;
+    private boolean dragging;
+
     private final Color averagesColor = new Color(48, 63, 159);
+    private BitBaySelectionListener selectionListener;
+
+    public BitBaySelectionPanel(){
+        super();
+
+        dragging = false;
+        addMouseMotionListener(this);
+        addMouseListener(this);
+    }
 
     /**
      * Sets data used to plotting.
@@ -33,6 +51,7 @@ public class BitBaySelectionPanel extends JPanel {
         valueRangeSize = valueMax - valueMin;
     }
 
+    @Override
     public void setRange(int start, int end){
         this.rangeStart = start;
         this.rangeEnd = end;
@@ -66,30 +85,93 @@ public class BitBaySelectionPanel extends JPanel {
             //value y scale to transform currency value to height on the screen
             final double yscale = getHeight() / valueRangeSize;
 
-            g2d.setStroke(new BasicStroke(1.5f));
+            int rangeStartX = (int) (rangeStart * dx);
+            int rangeEndX = (int) (rangeEnd * dx);
 
-            int i = 0;
-            BitBayCurrencyData currencyData = data.get(i);
+            drawValuesLine(g2d, dx, yscale);
 
-            int lastx = (int) ((i + 0.5) * dx);
-            double value = currencyData.getAverage();
-            int lasty = (int) ((valueMax - value) * yscale);
-
-            for (i = 1; i < data.size(); ++i) {
-                currencyData = data.get(i);
-                int x = (int) ((i + 0.5) * dx);
-                value = currencyData.getAverage();
-                int y = (int) ((valueMax - value) * yscale);
-                //draw closing
-                g2d.setColor(averagesColor);
-                g2d.drawLine(lastx - 1, lasty, x - 1, y);
-
-                lastx = x;
-                lasty = y;
-            }
-
-            g2d.setColor(new Color(0, 255, 0, 64));
-            g2d.fillRect((int)(rangeStart * dx), 0, (int)((rangeEnd - rangeStart) * dx), getHeight());
+            g2d.setColor(dragging ? draggingColor : selectionColor);
+            g2d.fillRect(rangeStartX, 0, rangeEndX - rangeStartX, getHeight());
         }
+    }
+
+    private void drawValuesLine(final Graphics2D g2d, final double dx, final double yscale){
+        g2d.setStroke(new BasicStroke(1.5f));
+
+        int i = 0;
+        BitBayCurrencyData currencyData = data.get(i);
+
+        int lastx = (int) ((i + 0.5) * dx);
+        double value = currencyData.getAverage();
+        int lasty = (int) ((valueMax - value) * yscale);
+
+        for (i = 1; i < data.size(); ++i) {
+            currencyData = data.get(i);
+            int x = (int) ((i + 0.5) * dx);
+            value = currencyData.getAverage();
+            int y = (int) ((valueMax - value) * yscale);
+            //draw closing
+            g2d.setColor(averagesColor);
+            g2d.drawLine(lastx - 1, lasty, x - 1, y);
+
+            lastx = x;
+            lasty = y;
+        }
+    }
+
+
+
+    public void setSelectionListener(BitBaySelectionListener selectionListener){
+        this.selectionListener = selectionListener;
+    }
+
+    @Override
+    public void mouseDragged(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+        int mouseX = e.getX();
+
+        final double dx = (double) getWidth() / data.size();
+
+        int rangeStartX = (int) (rangeStart * dx);
+        int rangeEndX = (int) (rangeEnd * dx);
+
+        System.out.println(mouseX);
+
+        if(mouseX >= rangeStartX && mouseX <= rangeEndX){
+            dragging = true;
+            repaint();
+        }
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+        dragging = false;
+        repaint();
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+        dragging = false;
+        repaint();
+
     }
 }
