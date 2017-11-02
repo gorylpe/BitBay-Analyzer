@@ -5,15 +5,15 @@ import java.time.LocalTime;
 import java.util.function.Function;
 
 public enum Period {
-    DAILY(  (period) -> period.plusDays(1),
-            (period) -> period.with(LocalTime.of(0, 0)));
+    DAILY(  (period) -> period + 24 * 3600,
+            (period) -> (period / (24 * 3600)) / 24 * 3600);
 
     private String name;
-    private Function<LocalDateTime, LocalDateTime> plusFunction;
-    Function<LocalDateTime, LocalDateTime> floorFunction;
+    private Function<Long, Long> plusFunction;
+    Function<Long, Long> floorFunction;
 
-    Period(Function<LocalDateTime, LocalDateTime> plusFunction,
-           Function<LocalDateTime, LocalDateTime> floorFunction){
+    Period(Function<Long, Long> plusFunction,
+           Function<Long, Long> floorFunction){
         name = name();
         this.plusFunction = plusFunction;
         this.floorFunction = floorFunction;
@@ -23,11 +23,11 @@ public enum Period {
         return name;
     }
 
-    public LocalDateTime plusPeriod(LocalDateTime localDateTime){
-        return plusFunction.apply(localDateTime);
+    public Long plusPeriod(Long time){
+        return plusFunction.apply(time);
     }
 
-    public LocalDateTime floorToPeriodType(LocalDateTime localDateTime){
-        return floorFunction.apply(localDateTime);
+    public Long floorToPeriodType(Long time){
+        return floorFunction.apply(time);
     }
 }
