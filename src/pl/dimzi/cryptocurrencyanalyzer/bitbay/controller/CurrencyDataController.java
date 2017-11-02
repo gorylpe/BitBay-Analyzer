@@ -1,26 +1,21 @@
 package pl.dimzi.cryptocurrencyanalyzer.bitbay.controller;
 
 import pl.dimzi.cryptocurrencyanalyzer.Log;
-import pl.dimzi.cryptocurrencyanalyzer.bitbay.enums.Period;
+import pl.dimzi.cryptocurrencyanalyzer.enums.Period;
 import pl.dimzi.cryptocurrencyanalyzer.bitbay.enums.TradeType;
-import pl.dimzi.cryptocurrencyanalyzer.bitbay.model.CurrencyData;
+import pl.dimzi.cryptocurrencyanalyzer.model.CurrencyData;
 import pl.dimzi.cryptocurrencyanalyzer.bitbay.model.Trade;
 import pl.dimzi.cryptocurrencyanalyzer.bitbay.repository.Repository;
-import pl.dimzi.cryptocurrencyanalyzer.bitbay.service.ConnectionService;
 
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 public class CurrencyDataController {
 
-    Repository repository;
-    ConnectionService connectionService;
+    private Repository repository;
 
-    public CurrencyDataController(Repository repository, ConnectionService connectionService){
+    public CurrencyDataController(Repository repository){
         this.repository = repository;
-        this.connectionService = connectionService;
     }
 
     /**
