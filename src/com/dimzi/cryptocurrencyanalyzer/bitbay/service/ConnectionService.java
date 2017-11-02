@@ -1,7 +1,7 @@
-package com.dimzi.cryptocurrencyanalyzer.service;
+package com.dimzi.cryptocurrencyanalyzer.bitbay.service;
 
-import com.dimzi.cryptocurrencyanalyzer.BitBay.TradeType;
-import com.dimzi.cryptocurrencyanalyzer.model.BitBayTrade;
+import com.dimzi.cryptocurrencyanalyzer.bitbay.model.TradeType;
+import com.dimzi.cryptocurrencyanalyzer.bitbay.model.Trade;
 import com.google.gson.Gson;
 
 import java.io.IOException;
@@ -9,19 +9,19 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-public class BitBayConnectionService {
+public class ConnectionService {
 
     Gson gson;
 
-    public BitBayConnectionService(){
+    public ConnectionService(){
         gson = new Gson();
     }
 
-    private BitBayTrade[] getTradeEntriesFromServer(TradeType type, Long since){
+    private Trade[] getTradeEntriesFromServer(TradeType type, Long since){
         try{
             URL url = new URL(type.getUrl() + since);
             String jsonString = new Scanner(url.openStream()).useDelimiter("\\A").next();
-            BitBayTrade[] tmp = gson.fromJson(jsonString, BitBayTrade[].class);
+            Trade[] tmp = gson.fromJson(jsonString, Trade[].class);
 
             return tmp;
         } catch(IOException e){
@@ -30,9 +30,9 @@ public class BitBayConnectionService {
         return null;
     }
 
-    public ArrayList<BitBayTrade> getTradesFromToTid(TradeType type, Long from, Long to){
-        ArrayList<BitBayTrade> trades = new ArrayList<>();
-        BitBayTrade[] tmpTrades;
+    public ArrayList<Trade> getTradesFromToTid(TradeType type, Long from, Long to){
+        ArrayList<Trade> trades = new ArrayList<>();
+        Trade[] tmpTrades;
         do{
             tmpTrades = getTradeEntriesFromServer(type, from);
             if(tmpTrades == null) break;
@@ -49,7 +49,7 @@ public class BitBayConnectionService {
         return trades;
     }
 
-    public ArrayList<BitBayTrade> getTradesFromToNow(TradeType type, Long from){
+    public ArrayList<Trade> getTradesFromToNow(TradeType type, Long from){
         return getTradesFromToTid(type, from, -1L);
     }
 }
