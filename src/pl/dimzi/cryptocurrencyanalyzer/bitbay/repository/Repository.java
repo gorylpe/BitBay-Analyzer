@@ -63,7 +63,7 @@ public class Repository {
 
     public void addTrades(ArrayList<Trade> trades, TradeType type) throws SQLException {
         for (Trade trade : trades) {
-            PreparedStatement preparedStatement = conn.prepareStatement("INSERT INTO " + type.getTradesTableName() + " VALUES (?, ?, ?, ?, ?)");
+            PreparedStatement preparedStatement = conn.prepareStatement("INSERT OR IGNORE INTO " + type.getTradesTableName() + " VALUES (?, ?, ?, ?, ?)");
             preparedStatement.setLong(1, trade.getTid());
             preparedStatement.setTimestamp(2, new java.sql.Timestamp(trade.getUnixTimestamp() * 1000));
             preparedStatement.setDouble(3, trade.getPrice());
@@ -80,7 +80,7 @@ public class Repository {
 
     public void addCurrencyData(ArrayList<CurrencyData> datas, TradeType type, Period period) throws SQLException {
         for (CurrencyData data : datas) {
-            PreparedStatement preparedStatement = conn.prepareStatement("INSERT INTO " + type.getCurrencyDataTableName(period) + " VALUES (?, ?, ?, ?, ?, ?, ?)");
+            PreparedStatement preparedStatement = conn.prepareStatement("INSERT OR IGNORE  INTO " + type.getCurrencyDataTableName(period) + " VALUES (?, ?, ?, ?, ?, ?, ?)");
             preparedStatement.setTimestamp(1, Timestamp.valueOf(data.getPeriodStart()));
             preparedStatement.setDouble(2, data.getMinimum());
             preparedStatement.setDouble(3, data.getMaximum());
