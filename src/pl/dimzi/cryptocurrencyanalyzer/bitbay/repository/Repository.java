@@ -1,22 +1,22 @@
-package pl.dimzi.cryptocurrencyanalyzer.bitbay.service;
+package pl.dimzi.cryptocurrencyanalyzer.bitbay.repository;
 
 import pl.dimzi.cryptocurrencyanalyzer.bitbay.model.CurrencyData;
 import pl.dimzi.cryptocurrencyanalyzer.bitbay.model.Trade;
-import pl.dimzi.cryptocurrencyanalyzer.bitbay.model.TradeType;
-import pl.dimzi.cryptocurrencyanalyzer.bitbay.model.Period;
+import pl.dimzi.cryptocurrencyanalyzer.bitbay.enums.TradeType;
+import pl.dimzi.cryptocurrencyanalyzer.bitbay.enums.Period;
 import pl.dimzi.cryptocurrencyanalyzer.DatabaseManager;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class DatabaseService {
+public class Repository {
     private final String DB_URL = "jdbc:sqlite:bitbay.db";
 
     private Connection conn;
     private ReentrantLock connLock = new ReentrantLock();
 
-    public DatabaseService() throws SQLException {
+    public Repository() throws SQLException {
         conn = DatabaseManager.getConn(DB_URL);
         initializeDatabase(conn);
     }
@@ -43,7 +43,7 @@ public class DatabaseService {
                 for (Period period : periodTypes) {
                     statement = conn.createStatement();
                     String createDailyCurrencyData = "CREATE TABLE IF NOT EXISTS " + type.getCurrencyDataTableName(period) + " (" +
-                            "periodStart DATETIME, " +
+                            "periodStart DATETIME PRIMARY KEY, " +
                             "minimum DOUBLE, " +
                             "maximum DOUBLE, " +
                             "opening DOUBLE, " +
@@ -61,7 +61,7 @@ public class DatabaseService {
         System.out.println("Database initialized successfully");
     }
 
-    public void addTradesToDb(ArrayList<Trade> trades, TradeType type) throws SQLException {
+    public void addTrades(ArrayList<Trade> trades, TradeType type) throws SQLException {
         for (Trade trade : trades) {
             PreparedStatement preparedStatement = conn.prepareStatement("INSERT INTO " + type.getTradesTableName() + " VALUES (?, ?, ?, ?, ?)");
             preparedStatement.setLong(1, trade.getTid());
@@ -78,7 +78,7 @@ public class DatabaseService {
         }
     }
 
-    public void addCurrencyDataToDb(ArrayList<CurrencyData> datas, TradeType type, Period period) throws SQLException {
+    public void addCurrencyData(ArrayList<CurrencyData> datas, TradeType type, Period period) throws SQLException {
         for (CurrencyData data : datas) {
             PreparedStatement preparedStatement = conn.prepareStatement("INSERT INTO " + type.getCurrencyDataTableName(period) + " VALUES (?, ?, ?, ?, ?, ?, ?)");
             preparedStatement.setTimestamp(1, Timestamp.valueOf(data.getPeriodStart()));
@@ -95,6 +95,15 @@ public class DatabaseService {
                 connLock.unlock();
             }
         }
+    }
+
+    public long getNewestTid(TradeType type) throws SQLException{
+        ResultSet resultSet = conn.createStatement().executeQuery(
+            "SELECT * FROM " + type.getTradesTableName() + " ORDER BY tid DESC LIMIT 1");
+        if(resultSet.next()){
+            return resultSet.getLong(1);
+        }
+        return 0;
     }
 
     public ArrayList<CurrencyData> getCurrencyDataAll(TradeType tradeType, TradeType type, Period periodType) {
