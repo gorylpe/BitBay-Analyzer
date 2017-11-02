@@ -1,9 +1,9 @@
 package pl.dimzi.cryptocurrencyanalyzer.bitbay.repository;
 
-import pl.dimzi.cryptocurrencyanalyzer.bitbay.model.CurrencyData;
+import pl.dimzi.cryptocurrencyanalyzer.model.CurrencyData;
 import pl.dimzi.cryptocurrencyanalyzer.bitbay.model.Trade;
 import pl.dimzi.cryptocurrencyanalyzer.bitbay.enums.TradeType;
-import pl.dimzi.cryptocurrencyanalyzer.bitbay.enums.Period;
+import pl.dimzi.cryptocurrencyanalyzer.enums.Period;
 import pl.dimzi.cryptocurrencyanalyzer.DatabaseManager;
 
 import java.sql.*;
@@ -85,6 +85,8 @@ public class Repository {
     public ArrayList<Trade> getTradesByDate(TradeType tradeType, Long from, Long to) throws SQLException{
         PreparedStatement statement = conn.prepareStatement(
                 "SELECT * FROM " + tradeType.getTradesTableName() + " WHERE date >= ? AND date < ? ORDER BY date ASC");
+        statement.setLong(1, from);
+        statement.setLong(2, to);
         ResultSet resultSet = statement.executeQuery();
 
         ArrayList<Trade> trades = new ArrayList<>();
@@ -145,8 +147,52 @@ public class Repository {
         }
     }
 
-    public ArrayList<CurrencyData> getCurrencyDataAll(TradeType tradeType, TradeType type, Period periodType) {
-        //TODO
-        return null;
+    public ArrayList<CurrencyData> getCurrencyDataByDateToLast(TradeType type, Period period, Long from) throws SQLException{
+        return getCurrencyDataByDate(type, period, from, -1L);
+    }
+
+    public ArrayList<CurrencyData> getCurrencyDataByDateFromFirst(TradeType type, Period period, Long to) throws SQLException{
+        return getCurrencyDataByDate(type, period, -1L, to);
+    }
+
+    public ArrayList<CurrencyData> getCurrencyDataAll(TradeType type, Period period) throws SQLException{
+        return getCurrencyDataByDate(type, period, -1L, -1L);
+    }
+
+    public ArrayList<CurrencyData> getCurrencyDataByDate(TradeType type, Period period, Long from, Long to) throws SQLException{
+        String sql = "SELECT * FROM " + type.getCurrencyDataTableName(period);
+        if(from != -1L)     sql += "WHERE date >= ?";
+        if(to != -1L)       sql += (from != -1L ? " AND date < ?" : "WHERE date < ?");
+        sql += " ORDER BY periodStart ASC";
+        PreparedStatement statement = conn.prepareStatement(sql);
+
+        if(from != -1L)     statement.setLong(1, from);
+        if(to != -1L)       statement.setLong(from != -1L ? 2 : 1, to);
+
+        ResultSet resultSet = statement.executeQuery();
+
+        ArrayList<CurrencyData> data = new ArrayList<>();
+        while (resultSet.next()) {
+            long date = resultSet.getTimestamp(1).getTime();
+            double minimum = resultSet.getDouble(2);
+            double maximum = resultSet.getDouble(3);
+            double opening = resultSet.getDouble(4);
+            double closing = resultSet.getDouble(5);
+            double average = resultSet.getDouble(6);
+            double volume = resultSet.getDouble(7);
+
+            CurrencyData currencyData = new CurrencyData();
+            currencyData.setPeriodStart(date);
+            currencyData.setMinimum(minimum);
+            currencyData.setMaximum(maximum);
+            currencyData.setOpening(opening);
+            currencyData.setClosing(closing);
+            currencyData.setAverage(average);
+            currencyData.setVolume(volume);
+
+            data.add(currencyData);
+        }
+
+        return data;
     }
 }
