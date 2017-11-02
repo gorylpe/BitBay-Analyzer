@@ -97,13 +97,18 @@ public class Repository {
         }
     }
 
-    public long getNewestTid(TradeType type) throws SQLException{
+    public Trade getNewestTrade(TradeType type) throws SQLException{
         ResultSet resultSet = conn.createStatement().executeQuery(
             "SELECT * FROM " + type.getTradesTableName() + " ORDER BY tid DESC LIMIT 1");
+        Trade trade = new Trade();
         if(resultSet.next()){
-            return resultSet.getLong(1);
+            trade.setTid(resultSet.getLong(1));
+            trade.setDate(resultSet.getTimestamp(2).getTime());
+            trade.setPrice(resultSet.getDouble(3));
+            trade.setAmount(resultSet.getDouble(4));
+            trade.setType(resultSet.getString(5));
         }
-        return 0;
+        return trade;
     }
 
     public ArrayList<CurrencyData> getCurrencyDataAll(TradeType tradeType, TradeType type, Period periodType) {
