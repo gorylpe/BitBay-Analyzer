@@ -1,7 +1,5 @@
-package pl.dimzi.cryptocurrencyanalyzer.bitbay.enums;
+package pl.dimzi.cryptocurrencyanalyzer.enums;
 
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.function.Function;
 
 public enum Period {
