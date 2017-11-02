@@ -1,4 +1,4 @@
-package com.dimzi.cryptocurrencyanalyzer;
+package pl.dimzi.cryptocurrencyanalyzer;
 
 import javax.swing.*;
 import java.awt.*;
@@ -6,7 +6,7 @@ import java.awt.*;
 public class Main {
 
     public static void main(String[] args) {
-
+        Log.enableDebug(true);
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 
