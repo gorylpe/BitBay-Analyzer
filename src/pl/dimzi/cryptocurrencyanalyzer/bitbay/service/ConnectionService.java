@@ -11,7 +11,7 @@ import java.util.Scanner;
 
 public class ConnectionService {
 
-    Gson gson;
+    private Gson gson;
 
     public ConnectionService(){
         gson = new Gson();
