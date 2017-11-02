@@ -62,44 +62,55 @@ public class Repository {
     }
 
     public void addTrades(ArrayList<Trade> trades, TradeType type) throws SQLException {
+        connLock.lock();
+        conn.setAutoCommit(false);
+        String sql = "INSERT OR REPLACE INTO " + type.getTradesTableName() + " VALUES (?, ?, ?, ?, ?)";
+        PreparedStatement preparedStatement = conn.prepareStatement(sql);
         for (Trade trade : trades) {
-            PreparedStatement preparedStatement = conn.prepareStatement("INSERT OR IGNORE INTO " + type.getTradesTableName() + " VALUES (?, ?, ?, ?, ?)");
             preparedStatement.setLong(1, trade.getTid());
             preparedStatement.setTimestamp(2, new java.sql.Timestamp(trade.getUnixTimestamp() * 1000));
             preparedStatement.setDouble(3, trade.getPrice());
             preparedStatement.setDouble(4, trade.getAmount());
             preparedStatement.setString(5, trade.getType());
-            connLock.lock();
-            try {
-                preparedStatement.execute();
-            } finally {
-                connLock.unlock();
-            }
+            preparedStatement.addBatch();
+        }
+        try {
+            preparedStatement.executeBatch();
+        } finally {
+            conn.setAutoCommit(true);
+            connLock.unlock();
         }
     }
 
-    public void addCurrencyData(ArrayList<CurrencyData> datas, TradeType type, Period period) throws SQLException {
-        for (CurrencyData data : datas) {
-            PreparedStatement preparedStatement = conn.prepareStatement("INSERT OR IGNORE  INTO " + type.getCurrencyDataTableName(period) + " VALUES (?, ?, ?, ?, ?, ?, ?)");
-            preparedStatement.setTimestamp(1, Timestamp.valueOf(data.getPeriodStart()));
-            preparedStatement.setDouble(2, data.getMinimum());
-            preparedStatement.setDouble(3, data.getMaximum());
-            preparedStatement.setDouble(4, data.getOpening());
-            preparedStatement.setDouble(5, data.getClosing());
-            preparedStatement.setDouble(6, data.getAverage());
-            preparedStatement.setDouble(7, data.getVolume());
-            connLock.lock();
-            try {
-                preparedStatement.execute();
-            } finally {
-                connLock.unlock();
-            }
+    public ArrayList<Trade> getTradesByDate(TradeType tradeType, Long from, Long to) throws SQLException{
+        PreparedStatement statement = conn.prepareStatement(
+                "SELECT * FROM " + tradeType.getTradesTableName() + " WHERE date >= ? AND date < ? ORDER BY date ASC");
+        ResultSet resultSet = statement.executeQuery();
+
+        ArrayList<Trade> trades = new ArrayList<>();
+        while (resultSet.next()) {
+            long            tid     = resultSet.getLong(1);
+            long            date    = resultSet.getTimestamp(2).getTime();
+            double          price   = resultSet.getDouble(3);
+            double          amount  = resultSet.getDouble(4);
+            String          type    = resultSet.getString(5);
+
+            Trade trade = new Trade();
+            trade.setTid(tid);
+            trade.setDate(date);
+            trade.setPrice(price);
+            trade.setAmount(amount);
+            trade.setType(type);
+
+            trades.add(trade);
         }
+
+        return trades;
     }
 
     public Trade getNewestTrade(TradeType type) throws SQLException{
         ResultSet resultSet = conn.createStatement().executeQuery(
-            "SELECT * FROM " + type.getTradesTableName() + " ORDER BY tid DESC LIMIT 1");
+                "SELECT * FROM " + type.getTradesTableName() + " ORDER BY tid DESC LIMIT 1");
         Trade trade = new Trade();
         if(resultSet.next()){
             trade.setTid(resultSet.getLong(1));
@@ -109,6 +120,29 @@ public class Repository {
             trade.setType(resultSet.getString(5));
         }
         return trade;
+    }
+
+    public void addCurrencyData(ArrayList<CurrencyData> datas, TradeType type, Period period) throws SQLException {
+        connLock.lock();
+        conn.setAutoCommit(false);
+        String sql = "INSERT OR REPLACE INTO " + type.getCurrencyDataTableName(period) + " VALUES (?, ?, ?, ?, ?, ?, ?)";
+        PreparedStatement preparedStatement = conn.prepareStatement(sql);
+        for (CurrencyData data : datas) {
+            preparedStatement.setTimestamp(1, new java.sql.Timestamp(data.getPeriodStart() * 1000));
+            preparedStatement.setDouble(2, data.getMinimum());
+            preparedStatement.setDouble(3, data.getMaximum());
+            preparedStatement.setDouble(4, data.getOpening());
+            preparedStatement.setDouble(5, data.getClosing());
+            preparedStatement.setDouble(6, data.getAverage());
+            preparedStatement.setDouble(7, data.getVolume());
+            preparedStatement.addBatch();
+        }
+        try {
+            preparedStatement.executeBatch();
+        } finally {
+            conn.setAutoCommit(true);
+            connLock.unlock();
+        }
     }
 
     public ArrayList<CurrencyData> getCurrencyDataAll(TradeType tradeType, TradeType type, Period periodType) {
