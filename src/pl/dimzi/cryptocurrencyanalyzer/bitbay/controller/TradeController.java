@@ -10,8 +10,8 @@ import java.util.ArrayList;
 
 public class TradeController {
 
-    Repository repository;
-    ConnectionService connectionService;
+    private Repository repository;
+    private ConnectionService connectionService;
 
     public TradeController(Repository repository, ConnectionService connectionService){
         this.repository = repository;
