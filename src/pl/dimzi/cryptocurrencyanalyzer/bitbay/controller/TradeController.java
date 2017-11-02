@@ -39,11 +39,7 @@ public class TradeController {
      * @throws SQLException if adding trades goes wrong
      */
     public void updateTrades(TradeType type, Long from) throws SQLException{
-        Long fromTid = repository.getNewestTrade(type).getTid();
-
-        ArrayList<Trade> trades = connectionService.getTradesFromToNow(type, fromTid);
-
-        repository.addTrades(trades, type);
+        updateTrades(type, from, -1L);
     }
 
     /**
@@ -60,8 +56,6 @@ public class TradeController {
         } else {
             trades = connectionService.getTradesFromTo(type, from, to);
         }
-
-        repository.getNewestTrade(type).getTid();
 
         repository.addTrades(trades, type);
     }
