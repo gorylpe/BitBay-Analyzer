@@ -3,7 +3,7 @@ package pl.dimzi.cryptocurrencyanalyzer.bitbay.model;
 import java.time.LocalDateTime;
 
 public class CurrencyData {
-    private LocalDateTime periodStart;
+    private Long periodStart;
     private Double minimum;
     private Double maximum;
     private Double opening;
@@ -18,17 +18,17 @@ public class CurrencyData {
         closing = 0.0;
         average = 0.0;
         volume = 0.0;
-        periodStart = LocalDateTime.now();
+        periodStart = 0L;
     }
 
-    public CurrencyData(double minimum, double maximum, double opening, double closing, double average, double volume, LocalDateTime periodStart){
+    public CurrencyData(double minimum, double maximum, double opening, double closing, double average, double volume, long periodStart){
         this.minimum = minimum;
         this.maximum = maximum;
         this.opening = opening;
         this.closing = closing;
         this.average = average;
         this.volume = volume;
-        this.periodStart = LocalDateTime.from(periodStart);
+        this.periodStart = periodStart;
     }
 
     public Double getMinimum() {
@@ -71,11 +71,11 @@ public class CurrencyData {
         this.average = average;
     }
 
-    public LocalDateTime getPeriodStart() {
+    public long getPeriodStart() {
         return periodStart;
     }
 
-    public void setPeriodStart(LocalDateTime periodStart) {
+    public void setPeriodStart(long periodStart) {
         this.periodStart = periodStart;
     }
 
