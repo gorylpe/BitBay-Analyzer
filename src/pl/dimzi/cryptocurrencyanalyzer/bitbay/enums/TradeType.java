@@ -1,5 +1,7 @@
-package pl.dimzi.cryptocurrencyanalyzer.bitbay.model;
+package pl.dimzi.cryptocurrencyanalyzer.bitbay.enums;
 
+
+import pl.dimzi.cryptocurrencyanalyzer.bitbay.model.CurrencyData;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,13 +15,15 @@ public enum TradeType {
     private String firstCurrency;
     private String secondCurrency;
     private String url;
+    private String since;
 
     public Map<Period, ArrayList<CurrencyData>> currencyDataMap;
     public Map<Period, CurrencyData> currentCurrencyDataMap;
 
     TradeType(String firstCurrency, String secondCurrency){
         this.name = name();
-        this.url = "https://bitbay.net/API/Public/" + name + "/trades.json?sort=asc&since=";
+        this.url = "https://bitbay.net/API/Public/" + name + "/trades.json?sort=asc";
+        this.since = "&since=";
         this.currencyDataMap = Collections.synchronizedMap(new EnumMap<Period, ArrayList<CurrencyData>>(Period.class));
         this.currentCurrencyDataMap = Collections.synchronizedMap(new EnumMap<Period, CurrencyData>(Period.class));
 
@@ -29,6 +33,10 @@ public enum TradeType {
 
     public String getUrl(){
         return url;
+    }
+
+    public String getSince() {
+        return since;
     }
 
     public String getTradesTableName(){
