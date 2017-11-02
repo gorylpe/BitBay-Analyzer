@@ -1,4 +1,4 @@
-package pl.dimzi.cryptocurrencyanalyzer.bitbay.model;
+package pl.dimzi.cryptocurrencyanalyzer.bitbay.enums;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -10,13 +10,13 @@ public enum Period {
 
     private String name;
     private Function<LocalDateTime, LocalDateTime> plusFunction;
-    Function<LocalDateTime, LocalDateTime> roundFunction;
+    Function<LocalDateTime, LocalDateTime> floorFunction;
 
     Period(Function<LocalDateTime, LocalDateTime> plusFunction,
-           Function<LocalDateTime, LocalDateTime> roundFunction){
+           Function<LocalDateTime, LocalDateTime> floorFunction){
         name = name();
         this.plusFunction = plusFunction;
-        this.roundFunction = roundFunction;
+        this.floorFunction = floorFunction;
     }
 
     public String getName(){
@@ -27,7 +27,7 @@ public enum Period {
         return plusFunction.apply(localDateTime);
     }
 
-    public LocalDateTime roundToPeriodType(LocalDateTime localDateTime){
-        return roundFunction.apply(localDateTime);
+    public LocalDateTime floorToPeriodType(LocalDateTime localDateTime){
+        return floorFunction.apply(localDateTime);
     }
 }
