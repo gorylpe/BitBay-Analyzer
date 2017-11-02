@@ -1,6 +1,6 @@
-package model;
+package com.dimzi.cryptocurrencyanalyzer.bitbay.model;
 
-public class BitBayTradeJSON {
+public class Trade {
     private Long tid;
     private Long date;
     private Double price;

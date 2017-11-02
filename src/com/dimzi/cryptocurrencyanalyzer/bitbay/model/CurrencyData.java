@@ -1,8 +1,8 @@
-package model;
+package com.dimzi.cryptocurrencyanalyzer.bitbay.model;
 
 import java.time.LocalDateTime;
 
-public class BitBayCurrencyData {
+public class CurrencyData {
     private LocalDateTime periodStart;
     private Double minimum;
     private Double maximum;
@@ -11,7 +11,7 @@ public class BitBayCurrencyData {
     private Double average;
     private Double volume;
 
-    public BitBayCurrencyData(){
+    public CurrencyData(){
         minimum = 0.0;
         maximum = 0.0;
         opening = 0.0;
@@ -21,7 +21,7 @@ public class BitBayCurrencyData {
         periodStart = LocalDateTime.now();
     }
 
-    public BitBayCurrencyData(double minimum, double maximum, double opening, double closing, double average, double volume, LocalDateTime periodStart){
+    public CurrencyData(double minimum, double maximum, double opening, double closing, double average, double volume, LocalDateTime periodStart){
         this.minimum = minimum;
         this.maximum = maximum;
         this.opening = opening;
