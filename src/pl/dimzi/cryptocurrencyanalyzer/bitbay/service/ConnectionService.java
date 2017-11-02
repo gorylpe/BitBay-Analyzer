@@ -30,6 +30,13 @@ public class ConnectionService {
         return null;
     }
 
+    /**
+     * Gets trades from server from "from" to "to" tids includes both.
+     * @param type trade type
+     * @param from tid to start from, including
+     * @param to tid to end at, including
+     * @return trades array
+     */
     public ArrayList<Trade> getTradesFromToTid(TradeType type, Long from, Long to){
         ArrayList<Trade> trades = new ArrayList<>();
         Trade[] tmpTrades;
@@ -67,13 +74,13 @@ public class ConnectionService {
         return null;
     }
 
-    public Long getUnixTimestampByTid(TradeType type, Long since){
+    public Trade getClosestNextTrade(TradeType type, Long since){
         try {
             URL url = new URL(type.getUrl() + type.getSince() + since);
             String jsonString = new Scanner(url.openStream()).useDelimiter("\\A").next();
             Trade[] tmp = gson.fromJson(jsonString, Trade[].class);
             if(tmp != null && tmp.length > 0){
-                return tmp[0].getUnixTimestamp();
+                return tmp[0];
             }
         } catch(IOException e){
             e.printStackTrace();
