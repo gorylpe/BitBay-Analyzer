@@ -37,7 +37,7 @@ public class ConnectionService {
      * @param to tid to end at, including
      * @return trades array
      */
-    public ArrayList<Trade> getTradesFromToTid(TradeType type, Long from, Long to){
+    public ArrayList<Trade> getTradesFromTo(TradeType type, Long from, Long to){
         ArrayList<Trade> trades = new ArrayList<>();
         Trade[] tmpTrades;
         do{
@@ -57,7 +57,7 @@ public class ConnectionService {
     }
 
     public ArrayList<Trade> getTradesFromToNow(TradeType type, Long from){
-        return getTradesFromToTid(type, from, -1L);
+        return getTradesFromTo(type, from, -1L);
     }
 
     public Long getNewestTid(TradeType type){
