@@ -1,7 +1,7 @@
-package com.dimzi.cryptocurrencyanalyzer.bitbay.service;
+package pl.dimzi.cryptocurrencyanalyzer.bitbay.service;
 
-import com.dimzi.cryptocurrencyanalyzer.bitbay.model.TradeType;
-import com.dimzi.cryptocurrencyanalyzer.bitbay.model.Trade;
+import pl.dimzi.cryptocurrencyanalyzer.bitbay.model.TradeType;
+import pl.dimzi.cryptocurrencyanalyzer.bitbay.model.Trade;
 import com.google.gson.Gson;
 
 import java.io.IOException;
@@ -51,5 +51,19 @@ public class ConnectionService {
 
     public ArrayList<Trade> getTradesFromToNow(TradeType type, Long from){
         return getTradesFromToTid(type, from, -1L);
+    }
+
+    public Long getNewestTid(TradeType type){
+        try {
+            URL url = new URL(type.getUrl());
+            String jsonString = new Scanner(url.openStream()).useDelimiter("\\A").next();
+            Trade[] tmp = gson.fromJson(jsonString, Trade[].class);
+            if(tmp != null && tmp.length > 0){
+                return tmp[tmp.length - 1].getTid();
+            }
+        } catch(IOException e){
+            e.printStackTrace();
+        }
+        return null;
     }
 }

@@ -1,4 +1,4 @@
-package com.dimzi.cryptocurrencyanalyzer.bitbay.model;
+package pl.dimzi.cryptocurrencyanalyzer.bitbay.model;
 
 public class Trade {
     private Long tid;

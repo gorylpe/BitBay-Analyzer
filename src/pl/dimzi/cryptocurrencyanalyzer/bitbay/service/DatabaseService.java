@@ -1,11 +1,10 @@
-package com.dimzi.cryptocurrencyanalyzer.bitbay.service;
+package pl.dimzi.cryptocurrencyanalyzer.bitbay.service;
 
-import com.dimzi.cryptocurrencyanalyzer.bitbay.model.CurrencyData;
-import com.dimzi.cryptocurrencyanalyzer.bitbay.model.Trade;
-import com.dimzi.cryptocurrencyanalyzer.bitbay.model.TradeType;
-import com.dimzi.cryptocurrencyanalyzer.bitbay.model.Period;
-import com.dimzi.cryptocurrencyanalyzer.DatabaseManager;
-import com.dimzi.cryptocurrencyanalyzer.ExchangeManager;
+import pl.dimzi.cryptocurrencyanalyzer.bitbay.model.CurrencyData;
+import pl.dimzi.cryptocurrencyanalyzer.bitbay.model.Trade;
+import pl.dimzi.cryptocurrencyanalyzer.bitbay.model.TradeType;
+import pl.dimzi.cryptocurrencyanalyzer.bitbay.model.Period;
+import pl.dimzi.cryptocurrencyanalyzer.DatabaseManager;
 
 import java.sql.*;
 import java.util.ArrayList;

@@ -1,7 +1,5 @@
-package com.dimzi.cryptocurrencyanalyzer.bitbay.model;
+package pl.dimzi.cryptocurrencyanalyzer.bitbay.model;
 
-
-import com.dimzi.cryptocurrencyanalyzer.ExchangeManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
