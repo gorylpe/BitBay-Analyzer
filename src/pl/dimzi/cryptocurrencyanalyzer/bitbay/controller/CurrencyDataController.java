@@ -28,8 +28,10 @@ public class CurrencyDataController {
     public void updateCurrencyData(TradeType type, Long dateFrom, Long dateTo) throws SQLException{
         for(Period period : Period.values()){
             ArrayList<CurrencyData> data = new ArrayList<>();
-            for(long i = period.floorToPeriodType(dateFrom); i < period.floorToPeriodType(dateTo); i = period.plusPeriod(i)){
+            for(long i = period.floorToPeriodType(dateFrom); i <= period.floorToPeriodType(dateTo); i = period.plusPeriod(i)){
                 ArrayList<Trade> trades = repository.getTradesByDate(type, i, period.plusPeriod(i));
+
+                Log.d(this, "Got " + trades.size() + " trades from " + i + " to " + period.plusPeriod(i));
 
                 if (trades.size() > 0) {
                     double minimum  = Double.MAX_VALUE;

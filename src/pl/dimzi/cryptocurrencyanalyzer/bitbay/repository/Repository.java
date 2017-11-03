@@ -1,5 +1,6 @@
 package pl.dimzi.cryptocurrencyanalyzer.bitbay.repository;
 
+import pl.dimzi.cryptocurrencyanalyzer.Log;
 import pl.dimzi.cryptocurrencyanalyzer.model.CurrencyData;
 import pl.dimzi.cryptocurrencyanalyzer.bitbay.model.Trade;
 import pl.dimzi.cryptocurrencyanalyzer.bitbay.enums.TradeType;
@@ -17,6 +18,7 @@ public class Repository {
     private ReentrantLock connLock = new ReentrantLock();
 
     public Repository() throws SQLException {
+        Log.d(this, "Initializing bitbay repository...");
         conn = DatabaseManager.getConn(DB_URL);
         initializeDatabase(conn);
     }
@@ -58,7 +60,7 @@ public class Repository {
             }
         }
 
-        System.out.println("Database initialized successfully");
+        Log.d(this, "Database initialized successfully");
     }
 
     public void addTrades(ArrayList<Trade> trades, TradeType type) throws SQLException {
@@ -68,7 +70,7 @@ public class Repository {
         PreparedStatement preparedStatement = conn.prepareStatement(sql);
         for (Trade trade : trades) {
             preparedStatement.setLong(1, trade.getTid());
-            preparedStatement.setTimestamp(2, new java.sql.Timestamp(trade.getUnixTimestamp() * 1000));
+            preparedStatement.setTimestamp(2, new java.sql.Timestamp(trade.getUnixTimestamp()));
             preparedStatement.setDouble(3, trade.getPrice());
             preparedStatement.setDouble(4, trade.getAmount());
             preparedStatement.setString(5, trade.getType());
@@ -83,10 +85,11 @@ public class Repository {
     }
 
     public ArrayList<Trade> getTradesByDate(TradeType tradeType, Long from, Long to) throws SQLException{
-        PreparedStatement statement = conn.prepareStatement(
-                "SELECT * FROM " + tradeType.getTradesTableName() + " WHERE date >= ? AND date < ? ORDER BY date ASC");
+        String sql = "SELECT * FROM " + tradeType.getTradesTableName() + " WHERE date >= ? AND date < ? ORDER BY date ASC";
+        PreparedStatement statement = conn.prepareStatement(sql);
         statement.setLong(1, from);
         statement.setLong(2, to);
+
         ResultSet resultSet = statement.executeQuery();
 
         ArrayList<Trade> trades = new ArrayList<>();

@@ -1,5 +1,6 @@
 package pl.dimzi.cryptocurrencyanalyzer.bitbay.controller;
 
+import pl.dimzi.cryptocurrencyanalyzer.Log;
 import pl.dimzi.cryptocurrencyanalyzer.bitbay.enums.TradeType;
 import pl.dimzi.cryptocurrencyanalyzer.bitbay.model.Trade;
 import pl.dimzi.cryptocurrencyanalyzer.bitbay.service.ConnectionService;
@@ -29,6 +30,8 @@ public class TradeController {
         Long from = findTidByDate(type, fromDate);
         Long to = findTidByDate(type, toDate);
 
+        Log.d(this, "Updating trades from pid " + from + " to " + to);
+
         updateTrades(type, from, to);
     }
 
@@ -52,10 +55,12 @@ public class TradeController {
     public void updateTrades(TradeType type, Long from, Long to) throws SQLException{
         ArrayList<Trade> trades;
         if(to == -1){
-            trades = connectionService.getTradesFromToNow(type, from);
+            trades = connectionService.getTradesToNow(type, from);
         } else {
             trades = connectionService.getTradesFromTo(type, from, to);
         }
+
+        Log.d(this, "Got " + trades.size() + " new trades");
 
         repository.addTrades(trades, type);
     }
