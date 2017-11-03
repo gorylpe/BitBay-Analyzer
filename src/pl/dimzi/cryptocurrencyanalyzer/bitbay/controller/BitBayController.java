@@ -7,6 +7,7 @@ import pl.dimzi.cryptocurrencyanalyzer.bitbay.service.ConnectionService;
 import pl.dimzi.cryptocurrencyanalyzer.enums.Period;
 import pl.dimzi.cryptocurrencyanalyzer.model.CurrencyData;
 
+import javax.swing.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -46,9 +47,9 @@ public enum BitBayController {
             long startTime = 1509410705;
             long stopTime = 1509669905;
             Log.d(this, "Getting trades of " + startTime + " to " + stopTime);
+            //TODO DEBUG DOWNLOAD TRADES
             //tradeController.updateTradesUsingDate(TradeType.ETHPLN, startTime, stopTime);
             currencyDataController.updateCurrencyData(TradeType.ETHPLN, startTime, stopTime);
-            refreshCurrencyData(Period.DAILY, TradeType.ETHPLN);
         }catch (SQLException e){
             Log.e(this, e.getMessage());
         }
@@ -62,5 +63,9 @@ public enum BitBayController {
 
     public ArrayList<CurrencyData> getCurrencyData(TradeType type, Period period){
         return currencyData.get(period).get(type);
+    }
+
+    public JPanel getRootPanel(){
+        return windowController.getRootPanel();
     }
 }

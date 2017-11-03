@@ -12,9 +12,6 @@ public class Main {
     public static void main(String[] args) {
         Log.enableDebug(true);
         try {
-            BitBayController.INSTANCE.refreshCurrencyData(Period.DAILY, TradeType.ETHPLN);
-        }catch (Exception e){}
-        try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 
             EventQueue.invokeLater(new Runnable() {
@@ -22,6 +19,10 @@ public class Main {
                 public void run() {
 
                     MainFrame mainFrame = new MainFrame();
+
+                    try {
+                        BitBayController.INSTANCE.refreshCurrencyData(Period.DAILY, TradeType.ETHPLN);
+                    }catch (Exception e){}
                 }
             });
 

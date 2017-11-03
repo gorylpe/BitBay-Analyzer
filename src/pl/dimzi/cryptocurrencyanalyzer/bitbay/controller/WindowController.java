@@ -8,6 +8,7 @@ import pl.dimzi.cryptocurrencyanalyzer.bitbay.view.Window;
 import pl.dimzi.cryptocurrencyanalyzer.enums.Period;
 import pl.dimzi.cryptocurrencyanalyzer.model.CurrencyData;
 
+import javax.swing.*;
 import java.awt.event.*;
 import java.util.ArrayList;
 
@@ -27,6 +28,10 @@ public class WindowController {
 
     public void refreshCurrencyData(TradeType tradeType, Period period, ArrayList<CurrencyData> currencyData) {
         plotController.refreshCurrencyData(tradeType, period, currencyData);
+    }
+
+    public JPanel getRootPanel(){
+        return window.getRootPanel();
     }
 
     private class PlotController extends MouseAdapter{
