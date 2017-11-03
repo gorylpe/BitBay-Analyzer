@@ -22,11 +22,11 @@ public enum Period {
         return name;
     }
 
-    public Long addPeriod(Long timeToAddTo, Long size){
+    public long addPeriod(long timeToAddTo, long size){
         return addFunction.apply(timeToAddTo, size);
     }
 
-    public Long floorToPeriodType(Long time){
+    public long floorToPeriodType(long time){
         return floorFunction.apply(time);
     }
 }
