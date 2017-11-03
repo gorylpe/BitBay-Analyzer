@@ -1,11 +1,15 @@
 package pl.dimzi.cryptocurrencyanalyzer.bitbay.controller;
 
 
+import pl.dimzi.cryptocurrencyanalyzer.bitbay.enums.TradeType;
 import pl.dimzi.cryptocurrencyanalyzer.bitbay.view.DetailsPanel;
 import pl.dimzi.cryptocurrencyanalyzer.bitbay.view.PlotPanel;
 import pl.dimzi.cryptocurrencyanalyzer.bitbay.view.Window;
+import pl.dimzi.cryptocurrencyanalyzer.enums.Period;
+import pl.dimzi.cryptocurrencyanalyzer.model.CurrencyData;
 
 import java.awt.event.*;
+import java.util.ArrayList;
 
 public class WindowController {
 
@@ -21,6 +25,10 @@ public class WindowController {
         detailsController = new DetailsController(window.getDetailsPanel());
     }
 
+    public void refreshCurrencyData(TradeType tradeType, Period period, ArrayList<CurrencyData> currencyData) {
+        plotController.refreshCurrencyData(tradeType, period, currencyData);
+    }
+
     private class PlotController extends MouseAdapter{
         private PlotPanel plot;
 
@@ -29,6 +37,10 @@ public class WindowController {
             plot.addMouseListener(this);
             plot.addMouseWheelListener(this);
             plot.addMouseMotionListener(this);
+        }
+
+        public void refreshCurrencyData(TradeType tradeType, Period period, ArrayList<CurrencyData> currencyData) {
+            plot.refreshCurrencyData(tradeType, period, currencyData);
         }
 
         @Override
