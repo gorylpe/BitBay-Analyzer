@@ -26,4 +26,8 @@ public enum Period {
     public long floorToPeriodType(long time){
         return (time / periodLength) * periodLength;
     }
+
+    public long getPeriodLength(){
+        return periodLength;
+    }
 }
