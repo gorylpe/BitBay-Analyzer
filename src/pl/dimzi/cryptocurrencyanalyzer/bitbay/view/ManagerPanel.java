@@ -1,9 +1,9 @@
-package com.dimzi.cryptocurrencyanalyzer.BitBay;
+package pl.dimzi.cryptocurrencyanalyzer.bitbay.view;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class BitBayManagerPanel {
+public class ManagerPanel {
     private JButton updateButton;
     private JPanel mainPanel;
 

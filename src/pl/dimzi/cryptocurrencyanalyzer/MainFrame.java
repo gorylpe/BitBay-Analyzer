@@ -1,14 +1,11 @@
-package com.dimzi.cryptocurrencyanalyzer;
-
-import com.dimzi.cryptocurrencyanalyzer.BitBay.BitBayManager;
-import com.dimzi.cryptocurrencyanalyzer.BitBay.BitBayWindow;
+package pl.dimzi.cryptocurrencyanalyzer;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
-import java.sql.SQLException;
+import pl.dimzi.cryptocurrencyanalyzer.*;
 
 public class MainFrame extends JFrame implements ActionListener{
 
@@ -44,7 +41,7 @@ public class MainFrame extends JFrame implements ActionListener{
         menuBar.add(viewsMenu);
         add(menuBar, BorderLayout.PAGE_START);
 
-        BitBayWindow bitBayWindow = new BitBayWindow();
+        pl.dimzi.cryptocurrencyanalyzer.bitbay.view.Window bitBayWindow = new pl.dimzi.cryptocurrencyanalyzer.bitbay.view.Window();
         add(bitBayWindow.getPanelMain(), BorderLayout.CENTER);
 
         setVisible(true);

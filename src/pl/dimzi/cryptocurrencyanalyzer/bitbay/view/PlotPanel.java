@@ -1,19 +1,22 @@
-package com.dimzi.cryptocurrencyanalyzer.BitBay;
+package pl.dimzi.cryptocurrencyanalyzer.bitbay.view;
 
-import model.BitBayCurrencyData;
+import pl.dimzi.cryptocurrencyanalyzer.bitbay.enums.TradeType;
+import pl.dimzi.cryptocurrencyanalyzer.model.CurrencyData;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Comparator;
 import java.util.List;
 
-public class BitBayPlotPanel extends JPanel implements MouseListener, MouseMotionListener{
+public class PlotPanel extends JPanel implements MouseListener, MouseMotionListener{
 
-    private List<BitBayCurrencyData> data;
-    private BitBayManager.TradeType tradeType;
+    private List<CurrencyData> data;
+    private TradeType tradeType;
     private double valueRangeSize;
     private double valueMin;
     private double valueMax;
@@ -45,7 +48,7 @@ public class BitBayPlotPanel extends JPanel implements MouseListener, MouseMotio
     /**
      * Initializes default values of plot panel.
      */
-    public BitBayPlotPanel(){
+    public PlotPanel(){
         super();
         isMouseOver = false;
 
@@ -59,18 +62,18 @@ public class BitBayPlotPanel extends JPanel implements MouseListener, MouseMotio
      * Sets data used to plotting.
      * @param data data array used to plotting.
      */
-    public void setData(List<BitBayCurrencyData> data) {
+    public void setData(List<CurrencyData> data) {
         this.data = data;
-        valueMin = data.stream().min(Comparator.comparing(BitBayCurrencyData::getMinimum)).get().getMinimum() * 0.95;
-        valueMax = data.stream().max(Comparator.comparing(BitBayCurrencyData::getMaximum)).get().getMaximum() * 1.05;
+        valueMin = data.stream().min(Comparator.comparing(CurrencyData::getMinimum)).get().getMinimum() * 0.95;
+        valueMax = data.stream().max(Comparator.comparing(CurrencyData::getMaximum)).get().getMaximum() * 1.05;
         valueRangeSize = valueMax - valueMin;
 
         volumeMin = 0;
-        volumeMax = data.stream().max(Comparator.comparing(BitBayCurrencyData::getVolume)).get().getVolume() * 1.25;
+        volumeMax = data.stream().max(Comparator.comparing(CurrencyData::getVolume)).get().getVolume() * 1.25;
         volumeRangeSize = volumeMax - volumeMin;
     }
 
-    public void setTradeType(BitBayManager.TradeType tradeType){
+    public void setTradeType(TradeType tradeType){
         this.tradeType = tradeType;
     }
 
@@ -158,7 +161,7 @@ public class BitBayPlotPanel extends JPanel implements MouseListener, MouseMotio
         g2d.setStroke(new BasicStroke(1.5f));
 
         int i = 0;
-        BitBayCurrencyData currencyData = data.get(i);
+        CurrencyData currencyData = data.get(i);
 
         int lastx = (int) ((i + 0.5) * dx);
         double value = currencyData.getAverage();
@@ -181,7 +184,7 @@ public class BitBayPlotPanel extends JPanel implements MouseListener, MouseMotio
     private void drawCandles(Graphics2D g2d, final double dx, final double yscale){
         g2d.setStroke(new BasicStroke(1.5f));
 
-        BitBayCurrencyData currencyData;
+        CurrencyData currencyData;
         for(int i = 0; i < data.size(); ++i){
             currencyData = data.get(i);
 
@@ -209,7 +212,7 @@ public class BitBayPlotPanel extends JPanel implements MouseListener, MouseMotio
     private void drawVolume(Graphics2D g2d, double dx, double yscale) {
         g2d.setStroke(new BasicStroke(1.5f));
 
-        BitBayCurrencyData currencyData;
+        CurrencyData currencyData;
         for (int i = 0; i < data.size(); ++i) {
             currencyData = data.get(i);
 
@@ -236,7 +239,7 @@ public class BitBayPlotPanel extends JPanel implements MouseListener, MouseMotio
         if(coveredDataIndex < 0)
             coveredDataIndex = 0;
 
-        BitBayCurrencyData currencyData = data.get(coveredDataIndex);
+        CurrencyData currencyData = data.get(coveredDataIndex);
 
         final int currencyX = (int)((coveredDataIndex + 0.5) * dx) - 1;
 
@@ -269,10 +272,10 @@ public class BitBayPlotPanel extends JPanel implements MouseListener, MouseMotio
         g2d.setColor(Color.GRAY);
         g2d.drawRoundRect(dialogX, dialogY, width, height, 10, 10);
 
-        String dayOfWeek = currencyData.getPeriodStart().toLocalDate().getDayOfWeek().name();
+        String dayOfWeek = Instant.ofEpochMilli(currencyData.getPeriodStart()).atZone(ZoneId.systemDefault()).toLocalDate().getDayOfWeek().name();
         dayOfWeek = dayOfWeek.substring(0, 1).toUpperCase() + dayOfWeek.substring(1).toLowerCase();
-        final String localDate = currencyData.getPeriodStart().toLocalDate().toString();
-        final String localTime = currencyData.getPeriodStart().toLocalTime().toString();
+        final String localDate = Instant.ofEpochMilli(currencyData.getPeriodStart()).atZone(ZoneId.systemDefault()).toLocalDate().toString();
+        final String localTime = Instant.ofEpochMilli(currencyData.getPeriodStart()).atZone(ZoneId.systemDefault()).toLocalTime().toString();
 
         g2d.setColor(Color.BLACK);
         g2d.setFont(dateFont);

@@ -1,26 +1,30 @@
-package com.dimzi.cryptocurrencyanalyzer.BitBay;
+package pl.dimzi.cryptocurrencyanalyzer.bitbay.view;
 
-import com.dimzi.cryptocurrencyanalyzer.CurrencyObserver;
-import com.dimzi.cryptocurrencyanalyzer.ExchangeManager;
-import model.BitBayCurrencyData;
+import pl.dimzi.cryptocurrencyanalyzer.Log;
+import pl.dimzi.cryptocurrencyanalyzer.bitbay.controller.BitBayController;
+import pl.dimzi.cryptocurrencyanalyzer.bitbay.enums.TradeType;
+import pl.dimzi.cryptocurrencyanalyzer.enums.Period;
+import pl.dimzi.cryptocurrencyanalyzer.model.CurrencyData;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.List;
 
-public class BitBayWindow implements CurrencyObserver, BitBaySelectionListener {
-    private BitBayPlotPanel plotPanel;
+public class Window implements SelectionListener {
+    private PlotPanel plotPanel;
     private JPanel panelMain;
     private JSpinner startSpinner;
     private JSpinner rangeSpinner;
     private JLabel intervalEndLabel;
     private JCheckBox averagesCheckBox;
     private JCheckBox followingCheckBox;
-    private BitBaySelectionPanel selectionPanel;
+    private SelectionPanel selectionPanel;
     private JButton updateValuesButton;
     private JLabel intervalStartLabel;
 
@@ -28,16 +32,13 @@ public class BitBayWindow implements CurrencyObserver, BitBaySelectionListener {
     private int intervalRange;
     private boolean isFollowing;
 
-    private ArrayList<BitBayCurrencyData> currencyData;
+    private ArrayList<CurrencyData> currencyData;
 
     /**
      * Constructor of BitBayWindow class.
      * Starts manager of exchange, initializes elements and listeners.
      */
-    public BitBayWindow() {
-        BitBayManager.INSTANCE.attachObserver(this);
-        BitBayManager.INSTANCE.notifyAllObservers();
-
+    public Window() {
         averagesCheckBox.addItemListener((ItemEvent e) -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
                 plotPanel.setDrawingAverages(true);
@@ -60,6 +61,7 @@ public class BitBayWindow implements CurrencyObserver, BitBaySelectionListener {
 
         updateValuesButton.addActionListener((ActionEvent e) -> {
             setRange((int) startSpinner.getValue(), (int) rangeSpinner.getValue());
+            update();
         });
 
         selectionPanel.setSelectionListener(this);
@@ -80,33 +82,31 @@ public class BitBayWindow implements CurrencyObserver, BitBaySelectionListener {
         if (currencyData != null) {
             if (range < 1)
                 range = 1;
-            if (range >= currencyData.size()){
-                range = currencyData.size();
+            if(start + range > currencyData.size()){
+                range = currencyData.size() - start;
             }
 
-            
-
             this.intervalStart = start;
-            this.intervalRange = end - start;
+            this.intervalRange = range;
+
+            Log.d(this, "Range set " + start + " - " + (start + range));
 
             refresh();
         }
     }
 
     private void refresh() {
-        //debug
-        plotPanel.setTradeType(BitBayManager.TradeType.ETHPLN);
-
         if (isFollowing) {
             intervalStart = currencyData.size() - 1 - intervalRange;
         }
         int intervalEnd = intervalStart + intervalRange;
 
         try {
-            List<BitBayCurrencyData> rangedData = currencyData.subList(intervalStart, intervalEnd);
+            Log.d(this, "currencyData.size() = " + currencyData.size() + "; intervalStart = " + intervalStart + "; intervalEnd = " + intervalEnd);
+            List<CurrencyData> rangedData = currencyData.subList(intervalStart, intervalEnd);
 
-            LocalDateTime intervalStartDateTime = rangedData.get(0).getPeriodStart();
-            LocalDateTime intervalEndDateTime = rangedData.get(rangedData.size() - 1).getPeriodStart();
+            LocalDateTime intervalStartDateTime = Instant.ofEpochMilli(rangedData.get(0).getPeriodStart()).atZone(ZoneId.systemDefault()).toLocalDateTime();
+            LocalDateTime intervalEndDateTime = Instant.ofEpochMilli(rangedData.get(rangedData.size() - 1).getPeriodStart()).atZone(ZoneId.systemDefault()).toLocalDateTime();
             intervalStartLabel.setText(intervalStartDateTime.toLocalDate().toString() + " " + intervalStartDateTime.toLocalTime().toString());
             intervalEndLabel.setText(intervalEndDateTime.toLocalDate().toString() + " " + intervalEndDateTime.toLocalTime().toString());
 
@@ -119,7 +119,7 @@ public class BitBayWindow implements CurrencyObserver, BitBaySelectionListener {
             selectionPanel.setRange(intervalStart, intervalEnd);
             selectionPanel.repaint();
         } catch (IndexOutOfBoundsException e) {
-            System.out.println("Wrong interval");
+            Log.d(this, "Wrong interval");
         }
     }
 
@@ -132,13 +132,14 @@ public class BitBayWindow implements CurrencyObserver, BitBaySelectionListener {
         return panelMain;
     }
 
-    @Override
     public void update() {
         System.out.println("BitBayWindow updating");
 
-        currencyData = BitBayManager.INSTANCE.getCurrencyData(
-                BitBayManager.TradeType.ETHPLN,
-                ExchangeManager.CurrencyDataPeriodType.DAILY);
+        currencyData = BitBayController.INSTANCE.getCurrencyData(
+                TradeType.ETHPLN,
+                Period.DAILY);
+
+        plotPanel.setTradeType(TradeType.ETHPLN);
 
         selectionPanel.setData(currencyData);
 
@@ -176,7 +177,7 @@ public class BitBayWindow implements CurrencyObserver, BitBaySelectionListener {
         gbc.fill = GridBagConstraints.BOTH;
         gbc.insets = new Insets(1, 1, 1, 1);
         panelMain.add(panel1, gbc);
-        plotPanel = new BitBayPlotPanel();
+        plotPanel = new PlotPanel();
         plotPanel.setPreferredSize(new Dimension(600, 300));
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
@@ -286,7 +287,7 @@ public class BitBayWindow implements CurrencyObserver, BitBaySelectionListener {
         gbc.fill = GridBagConstraints.BOTH;
         gbc.insets = new Insets(5, 5, 5, 5);
         panelMain.add(panel3, gbc);
-        selectionPanel = new BitBaySelectionPanel();
+        selectionPanel = new SelectionPanel();
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 0;

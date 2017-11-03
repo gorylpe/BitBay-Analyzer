@@ -1,6 +1,6 @@
-package com.dimzi.cryptocurrencyanalyzer.BitBay;
+package pl.dimzi.cryptocurrencyanalyzer.bitbay.view;
 
-import model.BitBayCurrencyData;
+import pl.dimzi.cryptocurrencyanalyzer.model.CurrencyData;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,8 +13,8 @@ import java.util.List;
 /**
  * Created by Piotr on 07.08.2017.
  */
-public class BitBaySelectionPanel extends JPanel implements MouseMotionListener, MouseListener, BitBaySelectionListener {
-    private List<BitBayCurrencyData> data;
+public class SelectionPanel extends JPanel implements MouseMotionListener, MouseListener, SelectionListener {
+    private List<CurrencyData> data;
     private double valueRangeSize;
     private double valueMin;
     private double valueMax;
@@ -29,9 +29,9 @@ public class BitBaySelectionPanel extends JPanel implements MouseMotionListener,
     private boolean dragging;
 
     private final Color averagesColor = new Color(48, 63, 159);
-    private BitBaySelectionListener selectionListener;
+    private SelectionListener selectionListener;
 
-    public BitBaySelectionPanel(){
+    public SelectionPanel(){
         super();
 
         dragging = false;
@@ -44,10 +44,10 @@ public class BitBaySelectionPanel extends JPanel implements MouseMotionListener,
      *
      * @param data data array used to plotting.
      */
-    public void setData(List<BitBayCurrencyData> data) {
+    public void setData(List<CurrencyData> data) {
         this.data = data;
-        valueMin = data.stream().min(Comparator.comparing(BitBayCurrencyData::getMinimum)).get().getMinimum() * 0.95;
-        valueMax = data.stream().max(Comparator.comparing(BitBayCurrencyData::getMaximum)).get().getMaximum() * 1.05;
+        valueMin = data.stream().min(Comparator.comparing(CurrencyData::getMinimum)).get().getMinimum() * 0.95;
+        valueMax = data.stream().max(Comparator.comparing(CurrencyData::getMaximum)).get().getMaximum() * 1.05;
         valueRangeSize = valueMax - valueMin;
     }
 
@@ -99,7 +99,7 @@ public class BitBaySelectionPanel extends JPanel implements MouseMotionListener,
         g2d.setStroke(new BasicStroke(1.5f));
 
         int i = 0;
-        BitBayCurrencyData currencyData = data.get(i);
+        CurrencyData currencyData = data.get(i);
 
         int lastx = (int) ((i + 0.5) * dx);
         double value = currencyData.getAverage();
@@ -121,7 +121,7 @@ public class BitBaySelectionPanel extends JPanel implements MouseMotionListener,
 
 
 
-    public void setSelectionListener(BitBaySelectionListener selectionListener){
+    public void setSelectionListener(SelectionListener selectionListener){
         this.selectionListener = selectionListener;
     }
 

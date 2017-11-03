@@ -1,5 +1,7 @@
 package pl.dimzi.cryptocurrencyanalyzer;
 
+import pl.dimzi.cryptocurrencyanalyzer.bitbay.controller.BitBayController;
+
 import javax.swing.*;
 import java.awt.*;
 
