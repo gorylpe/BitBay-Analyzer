@@ -5,7 +5,7 @@ import pl.dimzi.cryptocurrencyanalyzer.model.CurrencyData;
 import pl.dimzi.cryptocurrencyanalyzer.bitbay.model.Trade;
 import pl.dimzi.cryptocurrencyanalyzer.bitbay.enums.TradeType;
 import pl.dimzi.cryptocurrencyanalyzer.enums.Period;
-import pl.dimzi.cryptocurrencyanalyzer.DatabaseManager;
+import pl.dimzi.cryptocurrencyanalyzer.DatabaseConnection;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -19,7 +19,7 @@ public class Repository {
 
     public Repository() throws SQLException {
         Log.d(this, "Initializing bitbay repository...");
-        conn = DatabaseManager.getConn(DB_URL);
+        conn = DatabaseConnection.getConn(DB_URL);
         initializeDatabase(conn);
     }
 
