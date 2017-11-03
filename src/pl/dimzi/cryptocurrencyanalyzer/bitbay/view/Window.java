@@ -1,36 +1,20 @@
 package pl.dimzi.cryptocurrencyanalyzer.bitbay.view;
 
-import pl.dimzi.cryptocurrencyanalyzer.Log;
 import pl.dimzi.cryptocurrencyanalyzer.bitbay.controller.BitBayController;
+import pl.dimzi.cryptocurrencyanalyzer.bitbay.controller.WindowController;
 import pl.dimzi.cryptocurrencyanalyzer.bitbay.enums.TradeType;
 import pl.dimzi.cryptocurrencyanalyzer.enums.Period;
 import pl.dimzi.cryptocurrencyanalyzer.model.CurrencyData;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ItemEvent;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.*;
-import java.util.List;
 
-public class Window implements SelectionListener {
+public class Window{
+    private JPanel mainPanel;
+
     private PlotPanel plotPanel;
-    private JPanel panelMain;
-    private JSpinner startSpinner;
-    private JSpinner rangeSpinner;
-    private JLabel intervalEndLabel;
-    private JCheckBox averagesCheckBox;
-    private JCheckBox followingCheckBox;
-    private SelectionPanel selectionPanel;
-    private JButton updateValuesButton;
-    private JLabel intervalStartLabel;
-
-    private int intervalStart;
-    private int intervalRange;
-    private boolean isFollowing;
+    private DetailsPanel detailsPanel;
 
     private ArrayList<CurrencyData> currencyData;
 
@@ -38,98 +22,33 @@ public class Window implements SelectionListener {
      * Constructor of BitBayWindow class.
      * Starts manager of exchange, initializes elements and listeners.
      */
-    public Window() {
-        averagesCheckBox.addItemListener((ItemEvent e) -> {
-            if (e.getStateChange() == ItemEvent.SELECTED) {
-                plotPanel.setDrawingAverages(true);
-            } else {
-                plotPanel.setDrawingAverages(false);
-            }
-            refresh();
-        });
-
-        followingCheckBox.addItemListener((ItemEvent e) -> {
-            if (e.getStateChange() == ItemEvent.SELECTED) {
-                startSpinner.setEnabled(false);
-                isFollowing = true;
-            } else {
-                startSpinner.setEnabled(true);
-                isFollowing = false;
-            }
-            refresh();
-        });
-
-        updateValuesButton.addActionListener((ActionEvent e) -> {
-            setRange((int) startSpinner.getValue(), (int) rangeSpinner.getValue());
-            update();
-        });
-
-        selectionPanel.setSelectionListener(this);
-
-        isFollowing = false;
-        setRange(0, 50);
-    }
-
-    /**
-     * Sets range of chosen data and takes care of wrong values
-     *
-     * @param start start of the interval
-     * @param range range of the interval
-     * @throws NullPointerException Whether data is null array
-     */
-    @Override
-    public void setRange(int start, int range) {
-        if (currencyData != null) {
-            if (range < 1)
-                range = 1;
-            if(start + range > currencyData.size()){
-                range = currencyData.size() - start;
-            }
-
-            this.intervalStart = start;
-            this.intervalRange = range;
-
-            Log.d(this, "Range set " + start + " - " + (start + range));
-
-            refresh();
-        }
-    }
-
-    private void refresh() {
-        if (isFollowing) {
-            intervalStart = currencyData.size() - 1 - intervalRange;
-        }
-        int intervalEnd = intervalStart + intervalRange;
-
-        try {
-            Log.d(this, "currencyData.size() = " + currencyData.size() + "; intervalStart = " + intervalStart + "; intervalEnd = " + intervalEnd);
-            List<CurrencyData> rangedData = currencyData.subList(intervalStart, intervalEnd);
-
-            LocalDateTime intervalStartDateTime = Instant.ofEpochMilli(rangedData.get(0).getPeriodStart()).atZone(ZoneId.systemDefault()).toLocalDateTime();
-            LocalDateTime intervalEndDateTime = Instant.ofEpochMilli(rangedData.get(rangedData.size() - 1).getPeriodStart()).atZone(ZoneId.systemDefault()).toLocalDateTime();
-            intervalStartLabel.setText(intervalStartDateTime.toLocalDate().toString() + " " + intervalStartDateTime.toLocalTime().toString());
-            intervalEndLabel.setText(intervalEndDateTime.toLocalDate().toString() + " " + intervalEndDateTime.toLocalTime().toString());
-
-            plotPanel.setData(rangedData);
-            plotPanel.repaint();
-
-            startSpinner.setValue(intervalStart);
-            rangeSpinner.setValue(intervalEnd - intervalStart);
-
-            selectionPanel.setRange(intervalStart, intervalEnd);
-            selectionPanel.repaint();
-        } catch (IndexOutOfBoundsException e) {
-            Log.d(this, "Wrong interval");
-        }
-    }
+    public Window() {}
 
     /**
      * Returns main panel for attach
      *
      * @return panel to attach
      */
-    public JPanel getPanelMain() {
-        return panelMain;
+    public JPanel getMainPanel() {
+        return mainPanel;
+    }
+
+    /**
+     * Returns plot panel for controller
+     *
+     * @return panel to attach
+     */
+    public PlotPanel getPlotPanel() {
+        return plotPanel;
+    }
+
+    /**
+     * Returns details panel for controller
+     *
+     * @return panel to attach
+     */
+    public DetailsPanel getDetailsPanel() {
+        return detailsPanel;
     }
 
     public void update() {
@@ -140,10 +59,6 @@ public class Window implements SelectionListener {
                 Period.DAILY);
 
         plotPanel.setTradeType(TradeType.ETHPLN);
-
-        selectionPanel.setData(currencyData);
-
-        refresh();
     }
 
     {
@@ -161,9 +76,9 @@ public class Window implements SelectionListener {
      * @noinspection ALL
      */
     private void $$$setupUI$$$() {
-        panelMain = new JPanel();
-        panelMain.setLayout(new GridBagLayout());
-        panelMain.setBackground(new Color(-1513240));
+        mainPanel = new JPanel();
+        mainPanel.setLayout(new GridBagLayout());
+        mainPanel.setBackground(new Color(-1513240));
         final JPanel panel1 = new JPanel();
         panel1.setLayout(new GridBagLayout());
         panel1.setMinimumSize(new Dimension(600, 600));
@@ -176,7 +91,7 @@ public class Window implements SelectionListener {
         gbc.weighty = 1.0;
         gbc.fill = GridBagConstraints.BOTH;
         gbc.insets = new Insets(1, 1, 1, 1);
-        panelMain.add(panel1, gbc);
+        mainPanel.add(panel1, gbc);
         plotPanel = new PlotPanel();
         plotPanel.setPreferredSize(new Dimension(600, 300));
         gbc = new GridBagConstraints();
@@ -194,7 +109,7 @@ public class Window implements SelectionListener {
         gbc.gridx = 0;
         gbc.gridy = 2;
         gbc.fill = GridBagConstraints.BOTH;
-        panelMain.add(panel2, gbc);
+        mainPanel.add(panel2, gbc);
         rangeSpinner = new JSpinner();
         gbc = new GridBagConstraints();
         gbc.gridx = 1;
@@ -286,21 +201,19 @@ public class Window implements SelectionListener {
         gbc.weightx = 1.0;
         gbc.fill = GridBagConstraints.BOTH;
         gbc.insets = new Insets(5, 5, 5, 5);
-        panelMain.add(panel3, gbc);
-        selectionPanel = new SelectionPanel();
+        mainPanel.add(panel3, gbc);
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.weightx = 1.0;
         gbc.weighty = 1.0;
         gbc.fill = GridBagConstraints.BOTH;
-        panel3.add(selectionPanel, gbc);
     }
 
     /**
      * @noinspection ALL
      */
     public JComponent $$$getRootComponent$$$() {
-        return panelMain;
+        return mainPanel;
     }
 }

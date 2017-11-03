@@ -1,4 +1,4 @@
-package pl.dimzi.cryptocurrencyanalyzer.bitbay.view;
+package pl.dimzi.cryptocurrencyanalyzer.view;
 
 import javax.swing.*;
 import java.awt.*;
