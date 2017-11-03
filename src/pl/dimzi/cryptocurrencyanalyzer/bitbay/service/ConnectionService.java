@@ -1,5 +1,6 @@
 package pl.dimzi.cryptocurrencyanalyzer.bitbay.service;
 
+import pl.dimzi.cryptocurrencyanalyzer.Log;
 import pl.dimzi.cryptocurrencyanalyzer.bitbay.enums.TradeType;
 import pl.dimzi.cryptocurrencyanalyzer.bitbay.model.Trade;
 import com.google.gson.Gson;
@@ -13,17 +14,27 @@ public class ConnectionService {
 
     private Gson gson;
 
+    private Long lastTimeOfRequest = System.currentTimeMillis();
+
     public ConnectionService(){
         gson = new Gson();
     }
 
     private Trade[] getTradeEntriesFromServer(TradeType type, Long since){
         try{
-            URL url = new URL(type.getUrl() + type.getSince() + since);
+            long timeNow = System.currentTimeMillis();
+            if(timeNow - 500 < lastTimeOfRequest){
+                try{
+                    long sleepTime = 500 - (timeNow - lastTimeOfRequest);
+                    Thread.sleep(sleepTime > 0 ? sleepTime : 0);
+                } catch(InterruptedException e){}
+            }
+            Log.d(this, "Ask:" + type.getUrl(since));
+            URL url = new URL(type.getUrl(since));
             String jsonString = new Scanner(url.openStream()).useDelimiter("\\A").next();
-            Trade[] tmp = gson.fromJson(jsonString, Trade[].class);
+            Log.d(this, "Response:" + jsonString);
 
-            return tmp;
+            return gson.fromJson(jsonString, Trade[].class);
         } catch(IOException e){
             e.printStackTrace();
         }
@@ -49,20 +60,21 @@ public class ConnectionService {
                     trades.add(tmpTrades[i]);
                 }
             }
+            from = tmpTrades[tmpTrades.length - 1].getTid();
 
-
+            Log.d(this, "Got trades from tid " + tmpTrades[0].getTid() + " to " + tmpTrades[tmpTrades.length - 1].getTid());
         }while(tmpTrades.length > 0 && (from < to || to == -1));
 
         return trades;
     }
 
-    public ArrayList<Trade> getTradesFromToNow(TradeType type, Long from){
+    public ArrayList<Trade> getTradesToNow(TradeType type, Long from){
         return getTradesFromTo(type, from, -1L);
     }
 
     public Long getNewestTid(TradeType type){
         try {
-            URL url = new URL(type.getUrl());
+            URL url = new URL(type.getDescUrl());
             String jsonString = new Scanner(url.openStream()).useDelimiter("\\A").next();
             Trade[] tmp = gson.fromJson(jsonString, Trade[].class);
             if(tmp != null && tmp.length > 0){
@@ -76,7 +88,7 @@ public class ConnectionService {
 
     public Trade getClosestNextTrade(TradeType type, Long since){
         try {
-            URL url = new URL(type.getUrl() + type.getSince() + since);
+            URL url = new URL(type.getUrl(since));
             String jsonString = new Scanner(url.openStream()).useDelimiter("\\A").next();
             Trade[] tmp = gson.fromJson(jsonString, Trade[].class);
             if(tmp != null && tmp.length > 0){
