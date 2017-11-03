@@ -4,18 +4,15 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public enum Period {
-    DAILY(  (period, size) -> period + size * 24 * 3600,
-            (period) -> (period / (24 * 3600)) * 24 * 3600);
+    DAILY(24 * 3600);
 
     private String name;
-    private BiFunction<Long, Long, Long> addFunction;
-    Function<Long, Long> floorFunction;
 
-    Period(BiFunction<Long, Long, Long> addFunction,
-           Function<Long, Long> floorFunction){
+    private final long periodLength;
+
+    Period(long periodLength){
         name = name();
-        this.addFunction = addFunction;
-        this.floorFunction = floorFunction;
+        this.periodLength = periodLength;
     }
 
     public String getName(){
@@ -23,10 +20,10 @@ public enum Period {
     }
 
     public long addPeriod(long timeToAddTo, long size){
-        return addFunction.apply(timeToAddTo, size);
+        return timeToAddTo + periodLength * size;
     }
 
     public long floorToPeriodType(long time){
-        return floorFunction.apply(time);
+        return (time / periodLength) * periodLength;
     }
 }
