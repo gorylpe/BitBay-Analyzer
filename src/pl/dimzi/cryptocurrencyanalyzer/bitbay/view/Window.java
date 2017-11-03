@@ -1,17 +1,10 @@
 package pl.dimzi.cryptocurrencyanalyzer.bitbay.view;
 
-import pl.dimzi.cryptocurrencyanalyzer.bitbay.controller.BitBayController;
-import pl.dimzi.cryptocurrencyanalyzer.bitbay.controller.WindowController;
-import pl.dimzi.cryptocurrencyanalyzer.bitbay.enums.TradeType;
-import pl.dimzi.cryptocurrencyanalyzer.enums.Period;
-import pl.dimzi.cryptocurrencyanalyzer.model.CurrencyData;
-
 import javax.swing.*;
 import java.awt.*;
-import java.util.*;
 
 public class Window{
-    private JPanel mainPanel;
+    private JPanel rootPanel;
 
     private PlotPanel plotPanel;
     private DetailsPanel detailsPanel;
@@ -27,8 +20,8 @@ public class Window{
      *
      * @return panel to attach
      */
-    public JPanel getMainPanel() {
-        return mainPanel;
+    public JPanel getRootPanel() {
+        return rootPanel;
     }
 
     /**
@@ -64,9 +57,9 @@ public class Window{
      * @noinspection ALL
      */
     private void $$$setupUI$$$() {
-        mainPanel = new JPanel();
-        mainPanel.setLayout(new GridBagLayout());
-        mainPanel.setBackground(new Color(-1513240));
+        rootPanel = new JPanel();
+        rootPanel.setLayout(new GridBagLayout());
+        rootPanel.setBackground(new Color(-1513240));
         final JPanel panel1 = new JPanel();
         panel1.setLayout(new GridBagLayout());
         panel1.setMinimumSize(new Dimension(600, 600));
@@ -79,7 +72,7 @@ public class Window{
         gbc.weighty = 1.0;
         gbc.fill = GridBagConstraints.BOTH;
         gbc.insets = new Insets(1, 1, 1, 1);
-        mainPanel.add(panel1, gbc);
+        rootPanel.add(panel1, gbc);
         plotPanel = new PlotPanel();
         plotPanel.setPreferredSize(new Dimension(600, 300));
         gbc = new GridBagConstraints();
@@ -97,7 +90,7 @@ public class Window{
         gbc.gridx = 0;
         gbc.gridy = 2;
         gbc.fill = GridBagConstraints.BOTH;
-        mainPanel.add(panel2, gbc);
+        rootPanel.add(panel2, gbc);
         final JLabel label1 = new JLabel();
         label1.setHorizontalAlignment(0);
         label1.setText("Start");
@@ -130,7 +123,7 @@ public class Window{
         gbc.weightx = 1.0;
         gbc.fill = GridBagConstraints.BOTH;
         gbc.insets = new Insets(5, 5, 5, 5);
-        mainPanel.add(panel3, gbc);
+        rootPanel.add(panel3, gbc);
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 0;
@@ -143,6 +136,6 @@ public class Window{
      * @noinspection ALL
      */
     public JComponent $$$getRootComponent$$$() {
-        return mainPanel;
+        return rootPanel;
     }
 }

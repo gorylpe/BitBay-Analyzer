@@ -48,7 +48,9 @@ public class PlotPanel extends JPanel{
 
         dateRange = 30;
         //TODO DEBUG VAL
-        dateStart = 1509410705;
+        dateStart = 1509408000;
+
+        currencyData = new ArrayList<>();
     }
 
     /**
@@ -63,7 +65,7 @@ public class PlotPanel extends JPanel{
 
         dateEnd = period.addPeriod(dateStart, dateRange);
 
-        Log.d(this, "New dates, start " + dateStart + " end " + dateEnd + " elements " + currencyData.size());
+        Log.d(this, "New dates, start " + dateStart + " end " + dateEnd + " elements " + this.currencyData.size());
 
         repaint();
     }
@@ -98,42 +100,56 @@ public class PlotPanel extends JPanel{
 
         List<CurrencyData> visible = new ArrayList<>();
 
+        final long visibleDateStart = dateStart - period.getPeriodLength();
+        final long visibleDateEnd = dateEnd + period.getPeriodLength();
         for(int i = 0; i < currencyData.size(); ++i){
             CurrencyData data = currencyData.get(i);
-            if(data.getPeriodStart() > dateStart && data.getPeriodStart() < dateEnd){
+            if(data.getPeriodStart() > visibleDateStart && data.getPeriodStart() < visibleDateEnd){
                 visible.add(data);
             }
         }
 
-        double valueMax = visible.stream().max(Comparator.comparingDouble(CurrencyData::getMaximum)).get().getMaximum();
-        double valueMin = visible.stream().max(Comparator.comparingDouble(CurrencyData::getMinimum)).get().getMinimum();
+        Log.d(this, "Visible data " + visible.size());
 
-        double xnum = (dateEnd - dateStart) / period.getPeriodLength();
-        double dx = getWidth() / xnum;
+        if(visible.size() > 0){
+            double valueMax = visible.stream().max(Comparator.comparingDouble(CurrencyData::getMaximum)).get().getMaximum();
+            double valueMin = visible.stream().min(Comparator.comparingDouble(CurrencyData::getMinimum)).get().getMinimum();
 
-        double yscale = getHeight() / (valueMax - valueMin);
+            double xnum = (dateEnd - dateStart) / period.getPeriodLength();
+            double dx = getWidth() / xnum;
 
-        for(int i = 0; i < currencyData.size(); ++i){
-            CurrencyData data = currencyData.get(i);
+            final int topBottomPadding = 10;
+            double yscale = (getHeight() - 2*topBottomPadding) / (valueMax - valueMin);
 
-            //draw candle
-            final boolean increase = data.getOpening() < data.getClosing();
+            Log.d(this, "valueMin = " + valueMin + "; valueMax = " + valueMax + "; yscale = " + yscale);
 
-            final int x = (int)(i * dx);
-            final int width = (int)dx;
-            final int closingY = (int)((valueMax - data.getClosing()) * yscale);
-            final int openingY = (int)((valueMax - data.getOpening()) * yscale);
-            final int y = increase ? closingY : openingY;
-            final int height = Math.max(Math.abs(closingY - openingY), 1);
+            for(int i = 0; i < visible.size(); ++i){
+                CurrencyData data = visible.get(i);
 
-            Color candleColor = increase ? candleIncreaseColor : candleDecreaseColor;
+                //draw candle
+                final boolean increase = data.getOpening() < data.getClosing();
 
-            g2d.setColor(candleColor);
-            g2d.fillRect(x + width / 5, y, width * 3 / 5, height);
+                final int x = (int)Math.floor((1.0 * (data.getPeriodStart() - dateStart) / period.getPeriodLength() * dx));
+                final int width = (int)dx;
+                final int closingY = (int)((valueMax - data.getClosing()) * yscale) + topBottomPadding;
+                final int openingY = (int)((valueMax - data.getOpening()) * yscale) + topBottomPadding;
+                final int y = increase ? closingY : openingY;
+                final int height = Math.max(Math.abs(closingY - openingY), 1);
 
-            //draw minmax
-            g2d.setColor(candleColor);
-            g2d.drawLine(x + width / 2 - 1, (int) ((valueMax - data.getMinimum()) * yscale), x + width / 2 - 1, (int) ((valueMax - data.getMaximum()) * yscale));
+                Log.d(this, "x = " + x + ";" + " y = " + y + ";");
+                Log.d(this, "closingY = " + closingY + ";" + " openingY = " + openingY + ";");
+
+                Color candleColor = increase ? candleIncreaseColor : candleDecreaseColor;
+
+                g2d.setColor(candleColor);
+                g2d.fillRect(x + width / 5, y, width * 3 / 5, height);
+
+                final int minimumY = (int) ((valueMax - data.getMinimum()) * yscale) + topBottomPadding;
+                final int maximumY = (int) ((valueMax - data.getMaximum()) * yscale) + topBottomPadding;
+                //draw minmax
+                g2d.setColor(candleColor);
+                g2d.drawLine(x + width / 2 - 1, minimumY, x + width / 2 - 1, maximumY);
+            }
         }
     }
 }
