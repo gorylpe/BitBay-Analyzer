@@ -55,7 +55,9 @@ public enum BitBayController {
     }
 
     public void refreshCurrencyData(Period period, TradeType type) throws SQLException{
-        currencyData.get(period).put(type, repo.getCurrencyDataAll(type, period));
+        ArrayList<CurrencyData> data = repo.getCurrencyDataAll(type, period);
+        currencyData.get(period).put(type, data);
+        windowController.refreshCurrencyData(type, period, data);
     }
 
     public ArrayList<CurrencyData> getCurrencyData(TradeType type, Period period){
