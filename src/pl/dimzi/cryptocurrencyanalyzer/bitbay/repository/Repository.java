@@ -133,7 +133,7 @@ public class Repository {
         String sql = "INSERT OR REPLACE INTO " + type.getCurrencyDataTableName(period) + " VALUES (?, ?, ?, ?, ?, ?, ?)";
         PreparedStatement preparedStatement = conn.prepareStatement(sql);
         for (CurrencyData data : datas) {
-            preparedStatement.setTimestamp(1, new java.sql.Timestamp(data.getPeriodStart() * 1000));
+            preparedStatement.setTimestamp(1, new java.sql.Timestamp(data.getPeriodStart()));
             preparedStatement.setDouble(2, data.getMinimum());
             preparedStatement.setDouble(3, data.getMaximum());
             preparedStatement.setDouble(4, data.getOpening());
