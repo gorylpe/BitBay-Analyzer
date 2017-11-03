@@ -1,6 +1,6 @@
 package pl.dimzi.cryptocurrencyanalyzer;
 
-import pl.dimzi.cryptocurrencyanalyzer.bitbay.view.ManagerPanel;
+import pl.dimzi.cryptocurrencyanalyzer.view.ManagerPanel;
 
 import javax.swing.*;
 
