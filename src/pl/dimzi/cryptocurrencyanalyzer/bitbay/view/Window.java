@@ -16,8 +16,6 @@ public class Window{
     private PlotPanel plotPanel;
     private DetailsPanel detailsPanel;
 
-    private ArrayList<CurrencyData> currencyData;
-
     /**
      * Constructor of BitBayWindow class.
      * Starts manager of exchange, initializes elements and listeners.
@@ -49,16 +47,6 @@ public class Window{
      */
     public DetailsPanel getDetailsPanel() {
         return detailsPanel;
-    }
-
-    public void update() {
-        System.out.println("BitBayWindow updating");
-
-        currencyData = BitBayController.INSTANCE.getCurrencyData(
-                TradeType.ETHPLN,
-                Period.DAILY);
-
-        plotPanel.setTradeType(TradeType.ETHPLN);
     }
 
     {
@@ -110,13 +98,6 @@ public class Window{
         gbc.gridy = 2;
         gbc.fill = GridBagConstraints.BOTH;
         mainPanel.add(panel2, gbc);
-        rangeSpinner = new JSpinner();
-        gbc = new GridBagConstraints();
-        gbc.gridx = 1;
-        gbc.gridy = 1;
-        gbc.fill = GridBagConstraints.BOTH;
-        gbc.insets = new Insets(5, 5, 5, 5);
-        panel2.add(rangeSpinner, gbc);
         final JLabel label1 = new JLabel();
         label1.setHorizontalAlignment(0);
         label1.setText("Start");
@@ -127,16 +108,6 @@ public class Window{
         gbc.weighty = 1.0;
         gbc.fill = GridBagConstraints.BOTH;
         panel2.add(label1, gbc);
-        startSpinner = new JSpinner();
-        startSpinner.setMinimumSize(new Dimension(36, 26));
-        startSpinner.setPreferredSize(new Dimension(36, 26));
-        gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        gbc.weighty = 1.0;
-        gbc.fill = GridBagConstraints.BOTH;
-        gbc.insets = new Insets(5, 5, 5, 5);
-        panel2.add(startSpinner, gbc);
         final JLabel label2 = new JLabel();
         label2.setHorizontalAlignment(0);
         label2.setText("Range");
@@ -147,48 +118,6 @@ public class Window{
         gbc.weightx = 1.0;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         panel2.add(label2, gbc);
-        intervalEndLabel = new JLabel();
-        intervalEndLabel.setHorizontalAlignment(0);
-        intervalEndLabel.setText("");
-        gbc = new GridBagConstraints();
-        gbc.gridx = 1;
-        gbc.gridy = 2;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        panel2.add(intervalEndLabel, gbc);
-        averagesCheckBox = new JCheckBox();
-        averagesCheckBox.setBorderPaintedFlat(true);
-        averagesCheckBox.setHorizontalAlignment(0);
-        averagesCheckBox.setText("Averages");
-        gbc = new GridBagConstraints();
-        gbc.gridx = 3;
-        gbc.gridy = 1;
-        gbc.weightx = 1.0;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        panel2.add(averagesCheckBox, gbc);
-        followingCheckBox = new JCheckBox();
-        followingCheckBox.setHorizontalAlignment(0);
-        followingCheckBox.setText("Following");
-        gbc = new GridBagConstraints();
-        gbc.gridx = 2;
-        gbc.gridy = 0;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        panel2.add(followingCheckBox, gbc);
-        updateValuesButton = new JButton();
-        updateValuesButton.setText("Update");
-        gbc = new GridBagConstraints();
-        gbc.gridx = 2;
-        gbc.gridy = 1;
-        gbc.fill = GridBagConstraints.BOTH;
-        panel2.add(updateValuesButton, gbc);
-        intervalStartLabel = new JLabel();
-        intervalStartLabel.setHorizontalAlignment(0);
-        intervalStartLabel.setText("");
-        gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        gbc.weighty = 2.0;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        panel2.add(intervalStartLabel, gbc);
         final JPanel panel3 = new JPanel();
         panel3.setLayout(new GridBagLayout());
         panel3.setMinimumSize(new Dimension(24, 100));
