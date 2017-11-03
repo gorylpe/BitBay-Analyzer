@@ -15,24 +15,25 @@ public enum TradeType {
     private String name;
     private String firstCurrency;
     private String secondCurrency;
-    private String url;
-    private String since;
+    private String sinceUrl;
+    private String descUrl;
 
     TradeType(String firstCurrency, String secondCurrency){
         this.name = name();
-        this.url = "https://bitbay.net/API/Public/" + name + "/trades.json?sort=asc";
-        this.since = "&since=";
+        String url = "https://bitbay.net/API/Public/" + name + "/trades.json";
+        this.descUrl = url + "?sort=desc";
+        this.sinceUrl = url + "?sort=asc&since=";
 
         this.firstCurrency = firstCurrency;
         this.secondCurrency = secondCurrency;
     }
 
-    public String getUrl(){
-        return url;
+    public String getDescUrl(){
+        return descUrl;
     }
 
-    public String getSince() {
-        return since;
+    public String getUrl(long since){
+        return sinceUrl + since;
     }
 
     public String getTradesTableName(){
