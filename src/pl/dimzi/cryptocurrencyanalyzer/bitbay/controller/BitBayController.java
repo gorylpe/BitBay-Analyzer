@@ -56,13 +56,11 @@ public enum BitBayController {
     }
 
     public void refreshCurrencyData(Period period, TradeType type) throws SQLException{
+        long time = System.currentTimeMillis();
         ArrayList<CurrencyData> data = repo.getCurrencyDataAll(type, period);
         currencyData.get(period).put(type, data);
         windowController.refreshCurrencyData(type, period, data);
-    }
-
-    public ArrayList<CurrencyData> getCurrencyData(TradeType type, Period period){
-        return currencyData.get(period).get(type);
+        Log.d(this, "Refreshing data time " + (System.currentTimeMillis() - time) + "ms");
     }
 
     public JPanel getRootPanel(){
