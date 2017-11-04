@@ -2,7 +2,7 @@ package pl.dimzi.cryptocurrencyanalyzer.bitbay.controller.gui;
 
 import pl.dimzi.cryptocurrencyanalyzer.Log;
 import pl.dimzi.cryptocurrencyanalyzer.bitbay.enums.TradeType;
-import pl.dimzi.cryptocurrencyanalyzer.bitbay.view.PlotPanel;
+import pl.dimzi.cryptocurrencyanalyzer.bitbay.view.gui.PlotPanel;
 import pl.dimzi.cryptocurrencyanalyzer.enums.Period;
 import pl.dimzi.cryptocurrencyanalyzer.model.CurrencyData;
 
@@ -11,6 +11,7 @@ import java.awt.event.*;
 import java.util.ArrayList;
 
 public class PlotController extends Thread implements MouseListener, MouseMotionListener, MouseWheelListener {
+
     private PlotPanel plot;
 
     private final int frameLengthInMs = 10;

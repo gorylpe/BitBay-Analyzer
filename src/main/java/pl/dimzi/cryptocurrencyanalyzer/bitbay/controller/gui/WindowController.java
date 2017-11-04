@@ -2,8 +2,8 @@ package pl.dimzi.cryptocurrencyanalyzer.bitbay.controller.gui;
 
 
 import pl.dimzi.cryptocurrencyanalyzer.bitbay.enums.TradeType;
-import pl.dimzi.cryptocurrencyanalyzer.bitbay.view.DetailsPanel;
-import pl.dimzi.cryptocurrencyanalyzer.bitbay.view.Window;
+import pl.dimzi.cryptocurrencyanalyzer.bitbay.view.gui.DetailsPanel;
+import pl.dimzi.cryptocurrencyanalyzer.bitbay.view.gui.Window;
 import pl.dimzi.cryptocurrencyanalyzer.enums.Period;
 import pl.dimzi.cryptocurrencyanalyzer.model.CurrencyData;
 
