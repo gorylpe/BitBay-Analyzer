@@ -7,19 +7,12 @@ import pl.dimzi.cryptocurrencyanalyzer.model.CurrencyData;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
-import java.time.Instant;
-import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
-import java.util.List;
 
 public class PlotPanel extends JPanel{
 
-    private ArrayList<CurrencyData> currencyData;
+    private ArrayList<CurrencyData> visibleData;
     private TradeType tradeType;
     private Period period;
 
@@ -42,28 +35,31 @@ public class PlotPanel extends JPanel{
      */
     public PlotPanel() {
         super();
-
-        currencyData = new ArrayList<>();
     }
 
     /**
      * Sets data used to plotting.
-     * @param currencyData data array used to plotting.
+     * @param visibleData data array used to plotting.
      */
-    public void refreshCurrencyData(TradeType tradeType, Period period, ArrayList<CurrencyData> currencyData) {
+    public void refreshVisibleCurrencyData(TradeType tradeType, Period period, ArrayList<CurrencyData> visibleData) {
         Log.d(this, "Refreshing currency data");
         this.tradeType = tradeType;
         this.period = period;
-        this.currencyData = currencyData;
+        this.visibleData = visibleData;
 
-        Log.d(this, "New dates, start " + dateStart + " end " + dateEnd + " elements " + this.currencyData.size());
+        Log.d(this, "New dates, start " + dateStart + " end " + dateEnd + " elements " + this.visibleData.size());
 
         repaint();
     }
 
-    public void setNewDateRange(long dateStart, long dateEnd){
+    public void setDateRange(long dateStart, long dateEnd){
         this.dateStart = dateStart;
         this.dateEnd = dateEnd;
+        repaint();
+    }
+
+    public void setVisibleData(ArrayList<CurrencyData> visibleData){
+        this.visibleData = visibleData;
         repaint();
     }
 
@@ -88,27 +84,16 @@ public class PlotPanel extends JPanel{
         g2d.setColor(backgroundColor);
         g2d.fillRect(0, 0, getWidth(), getHeight());
 
-        if(currencyData != null)
+        if(visibleData != null)
             drawCandles(g2d);
     }
 
     private void drawCandles(Graphics2D g2d){
         g2d.setStroke(new BasicStroke(1.5f));
 
-        List<CurrencyData> visible = new ArrayList<>();
-
-        final long visibleDateStart = dateStart - period.getPeriodLength();
-        final long visibleDateEnd = dateEnd + period.getPeriodLength();
-        for(int i = 0; i < currencyData.size(); ++i){
-            CurrencyData data = currencyData.get(i);
-            if(data.getPeriodStart() > visibleDateStart && data.getPeriodStart() < visibleDateEnd){
-                visible.add(data);
-            }
-        }
-
-        if(visible.size() > 0){
-            double valueMax = visible.stream().max(Comparator.comparingDouble(CurrencyData::getMaximum)).get().getMaximum();
-            double valueMin = visible.stream().min(Comparator.comparingDouble(CurrencyData::getMinimum)).get().getMinimum();
+        if(visibleData.size() > 0){
+            double valueMax = visibleData.stream().max(Comparator.comparingDouble(CurrencyData::getMaximum)).get().getMaximum();
+            double valueMin = visibleData.stream().min(Comparator.comparingDouble(CurrencyData::getMinimum)).get().getMinimum();
 
             double xnum = (dateEnd - dateStart) / period.getPeriodLength();
             double dx = getWidth() / xnum;
@@ -116,8 +101,8 @@ public class PlotPanel extends JPanel{
             final int topBottomPadding = 10;
             double yscale = (getHeight() - 2*topBottomPadding) / (valueMax - valueMin);
 
-            for(int i = 0; i < visible.size(); ++i){
-                CurrencyData data = visible.get(i);
+            for(int i = 0; i < visibleData.size(); ++i){
+                CurrencyData data = visibleData.get(i);
 
                 //draw candle
                 final boolean increase = data.getOpening() < data.getClosing();
