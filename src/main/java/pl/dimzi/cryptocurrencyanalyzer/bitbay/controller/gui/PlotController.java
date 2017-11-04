@@ -1,4 +1,4 @@
-package pl.dimzi.cryptocurrencyanalyzer.bitbay.controller;
+package pl.dimzi.cryptocurrencyanalyzer.bitbay.controller.gui;
 
 import pl.dimzi.cryptocurrencyanalyzer.Log;
 import pl.dimzi.cryptocurrencyanalyzer.bitbay.enums.TradeType;
@@ -74,6 +74,8 @@ public class PlotController extends Thread implements MouseListener, MouseMotion
     public void changeCurrencyData(TradeType tradeType, Period period, ArrayList<CurrencyData> currencyData) {
         this.currencyData = currencyData;
         this.period = period;
+
+        //TODO IF PERIOD/TRADETYPE CHANGES, THEN SET START VALS TO HAVE END OF PLOT AT CENTER OF SCREEN
 
         //TODO DEBUG VAL
         setDateStart(1508008000);

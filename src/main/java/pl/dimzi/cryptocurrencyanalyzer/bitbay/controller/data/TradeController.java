@@ -1,4 +1,4 @@
-package pl.dimzi.cryptocurrencyanalyzer.bitbay.controller;
+package pl.dimzi.cryptocurrencyanalyzer.bitbay.controller.data;
 
 import pl.dimzi.cryptocurrencyanalyzer.Log;
 import pl.dimzi.cryptocurrencyanalyzer.bitbay.enums.TradeType;
