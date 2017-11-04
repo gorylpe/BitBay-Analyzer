@@ -1,5 +1,6 @@
 package pl.dimzi.cryptocurrencyanalyzer.bitbay.controller;
 
+import pl.dimzi.cryptocurrencyanalyzer.DatabaseConnection;
 import pl.dimzi.cryptocurrencyanalyzer.Log;
 import pl.dimzi.cryptocurrencyanalyzer.bitbay.enums.TradeType;
 import pl.dimzi.cryptocurrencyanalyzer.bitbay.repository.Repository;
@@ -16,6 +17,8 @@ import java.util.Map;
 public enum BitBayController {
     INSTANCE;
 
+    private final String DB_URL = "jdbc:sqlite:bitbay.db";
+
     private Repository repo;
     private ConnectionService connectionService;
 
@@ -31,7 +34,7 @@ public enum BitBayController {
 
     public void start(){
         try {
-            repo = new Repository();
+            repo = new Repository(DatabaseConnection.getConn(DB_URL));
             connectionService = new ConnectionService();
 
             tradeController = new TradeController(repo, connectionService);

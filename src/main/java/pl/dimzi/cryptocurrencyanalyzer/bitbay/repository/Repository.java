@@ -14,14 +14,12 @@ import java.util.Comparator;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Repository {
-    private final String DB_URL = "jdbc:sqlite:bitbay.db";
-
     private Connection conn;
     private ReentrantLock connLock = new ReentrantLock();
 
-    public Repository() throws SQLException {
+    public Repository(Connection conn) throws SQLException {
         Log.d(this, "Initializing bitbay repository...");
-        conn = DatabaseConnection.getConn(DB_URL);
+        this.conn = conn;
         initializeDatabase(conn);
     }
 
@@ -95,18 +93,21 @@ public class Repository {
             connLock.unlock();
         }
 
-        mergeTradesBlocksWithNewTrades(trades, type);
-    }
 
-    private void mergeTradesBlocksWithNewTrades(ArrayList<Trade> trades, TradeType type) throws SQLException{
         Long minDate = trades.stream().min(Comparator.comparingLong(Trade::getUnixTimestamp)).get().getUnixTimestamp();
         Long maxDate = trades.stream().max(Comparator.comparingLong(Trade::getUnixTimestamp)).get().getUnixTimestamp();
+        
+        TradeBlock newTradeBlock = new TradeBlock(minDate, maxDate);
+        mergeTradesBlocksWithNewTrade(newTradeBlock, type);
+    }
+
+    private void mergeTradesBlocksWithNewTrade(TradeBlock tradeBlock, TradeType type) throws SQLException{
 
         ArrayList<TradeBlock> tradeBlocksEndingInNewBlock =
-                getTradeBlocksByDate(type, minDate, maxDate, " WHERE dateEnd >= ? AND dateEnd <= ?");
+                getTradeBlocksByDate(type, tradeBlock.getDateStart(), tradeBlock.getDateEnd(), " WHERE dateEnd >= ? AND dateEnd <= ?");
 
         ArrayList<TradeBlock> tradeBlocksStartingInNewBlock =
-                getTradeBlocksByDate(type, minDate, maxDate, " WHERE dateStart >= ? AND dateStart <= ?");
+                getTradeBlocksByDate(type, tradeBlock.getDateStart(), tradeBlock.getDateEnd(), " WHERE dateStart >= ? AND dateStart <= ?");
 
         StringBuilder builder = new StringBuilder();
         for(TradeBlock block : tradeBlocksEndingInNewBlock){
@@ -116,29 +117,29 @@ public class Repository {
             builder.append("(").append(block.getDateStart()).append(", ").append(block.getDateEnd()).append(") ");
         }
 
-        Log.d(this, "Merging (" + minDate + ", " + maxDate + ") " + " with" + builder.toString());
+        Log.d(this, "Merging (" + tradeBlock.getDateStart() + ", " + tradeBlock.getDateEnd() + ") " + " with" + builder.toString());
 
-        Long newBlockMinDate = minDate;
+        Long newBlockDateStart = tradeBlock.getDateStart();
         for(TradeBlock block : tradeBlocksEndingInNewBlock){
-            if(block.getDateStart() < newBlockMinDate){
-                newBlockMinDate = block.getDateStart();
+            if(block.getDateStart() < newBlockDateStart){
+                newBlockDateStart = block.getDateStart();
             }
         }
 
-        Long newBlockMaxDate = maxDate;
+        Long newBlockDateEnd = tradeBlock.getDateEnd();
         for(TradeBlock block : tradeBlocksStartingInNewBlock){
-            if(block.getDateEnd() > newBlockMaxDate){
-                newBlockMaxDate = block.getDateEnd();
+            if(block.getDateEnd() > newBlockDateEnd){
+                newBlockDateEnd = block.getDateEnd();
             }
         }
 
-        removeTradeBlocksByDate(type, minDate, maxDate, " WHERE dateEnd >= ? AND dateEnd <= ?");
-        removeTradeBlocksByDate(type, minDate, maxDate, " WHERE dateStart >= ? AND dateStart <= ?");
+        removeTradeBlocksByDate(type, tradeBlock.getDateStart(), tradeBlock.getDateEnd(), " WHERE dateEnd >= ? AND dateEnd <= ?");
+        removeTradeBlocksByDate(type, tradeBlock.getDateStart(), tradeBlock.getDateEnd(), " WHERE dateStart >= ? AND dateStart <= ?");
 
         String sql = "INSERT OR REPLACE INTO " + type.getTradeBlocksTableName() + " VALUES(?, ?)";
         PreparedStatement statement = conn.prepareStatement(sql);
-        statement.setLong(1, minDate);
-        statement.setLong(2, maxDate);
+        statement.setLong(1, newBlockDateStart);
+        statement.setLong(2, newBlockDateEnd);
         connLock.lock();
         try{
             statement.execute();
