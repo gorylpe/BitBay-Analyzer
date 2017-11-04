@@ -25,6 +25,10 @@ public class Repository {
         initializeDatabase(conn);
     }
 
+    public void stop() throws SQLException{
+        if(conn != null) conn.close();
+    }
+
     private void initializeDatabase(Connection conn) throws SQLException {
         Statement statement;
 

@@ -17,11 +17,11 @@ public class Main {
             EventQueue.invokeLater(new Runnable() {
                 @Override
                 public void run() {
-
-                    MainFrame mainFrame = new MainFrame();
-
                     try {
+                        BitBayController.INSTANCE.start();
                         BitBayController.INSTANCE.refreshCurrencyData(Period.HOURLY, TradeType.ETHPLN);
+
+                        MainFrame mainFrame = new MainFrame();
                     }catch (Exception e){}
                 }
             });

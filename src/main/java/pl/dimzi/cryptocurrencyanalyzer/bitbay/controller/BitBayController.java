@@ -26,6 +26,10 @@ public enum BitBayController {
     private Map<Period, Map<TradeType, ArrayList<CurrencyData>>> currencyData;
 
     BitBayController() {
+
+    }
+
+    public void start(){
         try {
             repo = new Repository();
             connectionService = new ConnectionService();
@@ -41,26 +45,27 @@ public enum BitBayController {
         for (Period period : Period.values()) {
             currencyData.put(period, new EnumMap<>(TradeType.class));
         }
+        Log.d(this, "Started");
+    }
 
-        //DEBUG SOME INITIALIZATIONS
+    public void stop(){
         try {
-            long startTime = 1504568424;
-            long stopTime = 1509752424;
-            Log.d(this, "Getting trades of " + startTime + " to " + stopTime);
-            //TODO DEBUG DOWNLOAD TRADES
-            //tradeController.updateTradesUsingDate(TradeType.ETHPLN, startTime, stopTime);
-            currencyDataController.updateCurrencyData(TradeType.ETHPLN, startTime, stopTime);
+            repo.stop(); repo = null;
+            connectionService = null;
+
+            tradeController = null;
+            currencyDataController = null;
+
+            windowController.stop(); windowController = null;
         }catch (SQLException e){
             Log.e(this, e.getMessage());
         }
     }
 
     public void refreshCurrencyData(Period period, TradeType type) throws SQLException{
-        long time = System.currentTimeMillis();
         ArrayList<CurrencyData> data = repo.getCurrencyDataAll(type, period);
         currencyData.get(period).put(type, data);
         windowController.refreshCurrencyData(type, period, data);
-        Log.d(this, "Refreshing data time " + (System.currentTimeMillis() - time) + "ms");
     }
 
     public JPanel getRootPanel(){

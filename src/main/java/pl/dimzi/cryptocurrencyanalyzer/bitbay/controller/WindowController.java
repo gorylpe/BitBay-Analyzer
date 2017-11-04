@@ -21,11 +21,16 @@ public class WindowController {
         window = new Window();
 
         plotController = new PlotController(window.getPlotPanel());
+        plotController.start();
         detailsController = new DetailsController(window.getDetailsPanel());
     }
 
+    public void stop(){
+        plotController.interrupt();
+    }
+
     public void refreshCurrencyData(TradeType tradeType, Period period, ArrayList<CurrencyData> currencyData) {
-        plotController.refreshCurrencyData(tradeType, period, currencyData);
+        plotController.changeCurrencyData(tradeType, period, currencyData);
     }
 
     public JPanel getRootPanel(){
