@@ -25,13 +25,8 @@ public class PlotPanel extends JPanel{
 
     private long dateStart;
     private long dateEnd;
-    private int dateRange;
-
-    private final double partOfPeriodToDragAtOnePxDrag = 1.0 / 500;
 
     private final Font dateFont = new Font("Arial", Font.ITALIC, 10);
-    private final Font valueFont = new Font("Arial", Font.BOLD, 12);
-    private final Font textFont = new Font("Arial", Font.PLAIN, 12);
 
     private final Color backgroundColor = Color.WHITE;
     private final Color helpLineColor = new Color(0, 0, 0, 64);
@@ -61,35 +56,15 @@ public class PlotPanel extends JPanel{
         this.period = period;
         this.currencyData = currencyData;
 
-        //TODO DEBUG VAL
-        setDateStart(1509408000);
-        setDateRange(30);
-
         Log.d(this, "New dates, start " + dateStart + " end " + dateEnd + " elements " + this.currencyData.size());
 
         repaint();
     }
 
-    public void drag(double dx){
-        long dateShift = (long)(dx * partOfPeriodToDragAtOnePxDrag * dateRange * period.getPeriodLength());
-        Log.d(this, "" + dateShift);
-        setDateStart(dateStart + dateShift);
-    }
-
-    public void setDateStart(long dateStart){
+    public void setNewDateRange(long dateStart, long dateEnd){
         this.dateStart = dateStart;
-        recalculateDateEnd();
+        this.dateEnd = dateEnd;
         repaint();
-    }
-
-    public void setDateRange(int dateRange) {
-        this.dateRange = dateRange;
-        recalculateDateEnd();
-        repaint();
-    }
-
-    private void recalculateDateEnd() {
-        dateEnd = period.addPeriod(dateStart, dateRange);
     }
 
     /**
@@ -130,8 +105,6 @@ public class PlotPanel extends JPanel{
                 visible.add(data);
             }
         }
-
-        Log.d(this, "Visible data " + visible.size());
 
         if(visible.size() > 0){
             double valueMax = visible.stream().max(Comparator.comparingDouble(CurrencyData::getMaximum)).get().getMaximum();
