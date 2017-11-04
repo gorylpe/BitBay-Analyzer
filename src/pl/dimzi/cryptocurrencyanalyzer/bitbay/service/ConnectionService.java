@@ -20,15 +20,20 @@ public class ConnectionService {
         gson = new Gson();
     }
 
-    private Trade[] getTradeEntriesFromServer(TradeType type, Long since){
+    private void waitForNextRequest(long time){
+        long timeNow = System.currentTimeMillis();
+        if(timeNow - time < lastTimeOfRequest){
+            try{
+                long sleepTime = time - (timeNow - lastTimeOfRequest);
+                Thread.sleep(sleepTime > 0 ? sleepTime : 0);
+                lastTimeOfRequest = System.currentTimeMillis();
+            } catch(InterruptedException e){}
+        }
+    }
+
+    private Trade[] get50TradeEntriesFromServer(TradeType type, Long since){
         try{
-            long timeNow = System.currentTimeMillis();
-            if(timeNow - 500 < lastTimeOfRequest){
-                try{
-                    long sleepTime = 500 - (timeNow - lastTimeOfRequest);
-                    Thread.sleep(sleepTime > 0 ? sleepTime : 0);
-                } catch(InterruptedException e){}
-            }
+            waitForNextRequest(500);
             Log.d(this, "Ask:" + type.getUrl(since));
             URL url = new URL(type.getUrl(since));
             String jsonString = new Scanner(url.openStream()).useDelimiter("\\A").next();
@@ -52,7 +57,7 @@ public class ConnectionService {
         ArrayList<Trade> trades = new ArrayList<>();
         Trade[] tmpTrades;
         do{
-            tmpTrades = getTradeEntriesFromServer(type, from);
+            tmpTrades = get50TradeEntriesFromServer(type, from);
             if(tmpTrades == null) break;
 
             for(int i = 0; i < tmpTrades.length; ++i){
@@ -74,6 +79,7 @@ public class ConnectionService {
 
     public Long getNewestTid(TradeType type){
         try {
+            waitForNextRequest(200);
             URL url = new URL(type.getDescUrl());
             String jsonString = new Scanner(url.openStream()).useDelimiter("\\A").next();
             Trade[] tmp = gson.fromJson(jsonString, Trade[].class);
@@ -88,13 +94,7 @@ public class ConnectionService {
 
     public Trade getClosestNextTrade(TradeType type, Long since){
         try {
-            long timeNow = System.currentTimeMillis();
-            if(timeNow - 200 < lastTimeOfRequest){
-                try{
-                    long sleepTime = 200 - (timeNow - lastTimeOfRequest);
-                    Thread.sleep(sleepTime > 0 ? sleepTime : 0);
-                } catch(InterruptedException e){}
-            }
+            waitForNextRequest(200);
             URL url = new URL(type.getUrl(since));
             String jsonString = new Scanner(url.openStream()).useDelimiter("\\A").next();
             Trade[] tmp = gson.fromJson(jsonString, Trade[].class);
