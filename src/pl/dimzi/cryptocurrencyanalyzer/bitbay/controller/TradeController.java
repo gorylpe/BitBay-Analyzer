@@ -19,6 +19,8 @@ public class TradeController {
         this.connectionService = connectionService;
     }
 
+    //TODO SAVE CONTINUOUS BLOCKS FROM TID TO TID INFO IN TABLE, THEN USE TO NOT RETRIEVE SAME TRADES
+
     /**
      * Downloads and inserts toDate repo all trades from "fromDate" to "toDate" dates.
      * @param type type of trade
