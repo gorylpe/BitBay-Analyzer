@@ -40,6 +40,8 @@ public enum TradeType {
         return name + "_TRADES";
     }
 
+    public String getTradeBlocksTableName() { return name + "_BLOCKS"; }
+
     public String getCurrencyDataTableName(Period periodType){
         return name + "_" + periodType.getName();
     }
