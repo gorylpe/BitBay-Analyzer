@@ -2,19 +2,24 @@ package pl.dimzi.cryptocurrencyanalyzer.bitbay.controller;
 
 import pl.dimzi.cryptocurrencyanalyzer.DatabaseConnection;
 import pl.dimzi.cryptocurrencyanalyzer.Log;
+import pl.dimzi.cryptocurrencyanalyzer.bitbay.controller.data.CurrencyDataController;
+import pl.dimzi.cryptocurrencyanalyzer.bitbay.controller.data.TradeController;
+import pl.dimzi.cryptocurrencyanalyzer.bitbay.controller.gui.WindowController;
+import pl.dimzi.cryptocurrencyanalyzer.bitbay.controller.manager.ManagerController;
 import pl.dimzi.cryptocurrencyanalyzer.bitbay.enums.TradeType;
 import pl.dimzi.cryptocurrencyanalyzer.bitbay.repository.Repository;
 import pl.dimzi.cryptocurrencyanalyzer.bitbay.service.ConnectionService;
+import pl.dimzi.cryptocurrencyanalyzer.bitbay.view.manager.ManagerPanel;
 import pl.dimzi.cryptocurrencyanalyzer.enums.Period;
 import pl.dimzi.cryptocurrencyanalyzer.model.CurrencyData;
 
 import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.Map;
 
-public enum BitBayController {
+public enum BitBayController implements ActionListener{
     INSTANCE;
 
     private final String DB_URL = "jdbc:sqlite:bitbay.db";
@@ -25,11 +30,10 @@ public enum BitBayController {
     private TradeController tradeController;
     private CurrencyDataController currencyDataController;
     private WindowController windowController;
-
-    private Map<Period, Map<TradeType, ArrayList<CurrencyData>>> currencyData;
+    private ManagerController managerController;
 
     BitBayController() {
-
+        managerController = new ManagerController(this);
     }
 
     public void start(){
@@ -42,11 +46,6 @@ public enum BitBayController {
             windowController = new WindowController();
         }catch (SQLException e){
             Log.e(this, e.getMessage());
-        }
-
-        currencyData = new EnumMap<>(Period.class);
-        for (Period period : Period.values()) {
-            currencyData.put(period, new EnumMap<>(TradeType.class));
         }
         Log.d(this, "Started");
     }
@@ -67,11 +66,19 @@ public enum BitBayController {
 
     public void refreshCurrencyData(Period period, TradeType type) throws SQLException{
         ArrayList<CurrencyData> data = repo.getCurrencyDataAll(type, period);
-        currencyData.get(period).put(type, data);
         windowController.refreshCurrencyData(type, period, data);
     }
 
-    public JPanel getRootPanel(){
+    public JPanel getWindowRootPanel(){
         return windowController.getRootPanel();
+    }
+
+    public JPanel getManagerRootPanel(){
+        return managerController.getRootPanel();
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+
     }
 }
