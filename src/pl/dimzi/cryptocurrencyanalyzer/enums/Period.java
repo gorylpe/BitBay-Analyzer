@@ -4,15 +4,16 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public enum Period {
-    DAILY(24 * 3600);
+    DAILY(24 * 60 * 60),
+    HOURLY(60 * 60);
 
     private String name;
 
     private final long periodLength;
 
-    Period(long periodLength){
+    Period(long periodLengthInSeconds){
         name = name();
-        this.periodLength = periodLength;
+        this.periodLength = periodLengthInSeconds;
     }
 
     public String getName(){

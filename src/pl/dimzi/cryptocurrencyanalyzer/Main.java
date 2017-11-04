@@ -21,7 +21,7 @@ public class Main {
                     MainFrame mainFrame = new MainFrame();
 
                     try {
-                        BitBayController.INSTANCE.refreshCurrencyData(Period.DAILY, TradeType.ETHPLN);
+                        BitBayController.INSTANCE.refreshCurrencyData(Period.HOURLY, TradeType.ETHPLN);
                     }catch (Exception e){}
                 }
             });
