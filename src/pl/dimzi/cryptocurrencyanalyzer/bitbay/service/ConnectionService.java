@@ -88,6 +88,13 @@ public class ConnectionService {
 
     public Trade getClosestNextTrade(TradeType type, Long since){
         try {
+            long timeNow = System.currentTimeMillis();
+            if(timeNow - 200 < lastTimeOfRequest){
+                try{
+                    long sleepTime = 200 - (timeNow - lastTimeOfRequest);
+                    Thread.sleep(sleepTime > 0 ? sleepTime : 0);
+                } catch(InterruptedException e){}
+            }
             URL url = new URL(type.getUrl(since));
             String jsonString = new Scanner(url.openStream()).useDelimiter("\\A").next();
             Trade[] tmp = gson.fromJson(jsonString, Trade[].class);
