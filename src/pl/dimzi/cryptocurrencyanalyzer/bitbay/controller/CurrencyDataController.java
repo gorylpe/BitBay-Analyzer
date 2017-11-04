@@ -26,6 +26,7 @@ public class CurrencyDataController {
      * @throws SQLException if adding trades goes wrong
      */
     public void updateCurrencyData(TradeType type, Long dateFrom, Long dateTo) throws SQLException{
+        long time = System.currentTimeMillis();
         for(Period period : Period.values()){
             ArrayList<CurrencyData> data = new ArrayList<>();
             for(long i = period.floorToPeriodType(dateFrom); i <= period.floorToPeriodType(dateTo); i = period.addPeriod(i, 1L)){
@@ -60,5 +61,6 @@ public class CurrencyDataController {
             repository.addCurrencyData(data, type, period);
             Log.d(this, "Added " + data.size() + " currency datas of period " + period.getName());
         }
+        Log.d(this, "updateCurrencyData " + (System.currentTimeMillis() - time) + "ms");
     }
 }

@@ -44,8 +44,8 @@ public enum BitBayController {
 
         //DEBUG SOME INITIALIZATIONS
         try {
-            long startTime = 1509410705;
-            long stopTime = 1509669905;
+            long startTime = 1504568424;
+            long stopTime = 1509752424;
             Log.d(this, "Getting trades of " + startTime + " to " + stopTime);
             //TODO DEBUG DOWNLOAD TRADES
             //tradeController.updateTradesUsingDate(TradeType.ETHPLN, startTime, stopTime);
