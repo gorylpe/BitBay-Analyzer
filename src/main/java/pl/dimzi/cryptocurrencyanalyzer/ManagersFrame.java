@@ -1,18 +1,15 @@
 package pl.dimzi.cryptocurrencyanalyzer;
 
-import pl.dimzi.cryptocurrencyanalyzer.view.ManagerPanel;
+import pl.dimzi.cryptocurrencyanalyzer.bitbay.controller.BitBayController;
 
 import javax.swing.*;
 
 public class ManagersFrame extends JFrame{
 
-    ManagerPanel managerPanel;
-
     ManagersFrame(){
         super("Exchange managers");
 
-        managerPanel = new ManagerPanel();
-        add(managerPanel.getMainPanel());
+        add(BitBayController.INSTANCE.getManagerRootPanel());
 
         pack();
         setVisible(false);

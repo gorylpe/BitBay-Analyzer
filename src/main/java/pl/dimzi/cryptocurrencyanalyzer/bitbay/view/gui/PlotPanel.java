@@ -96,7 +96,6 @@ public class PlotPanel extends JPanel{
         g2d.setStroke(new BasicStroke(1.5f));
 
         if(visibleData.size() > 0){
-            long time = System.nanoTime();
             double valueMax = visibleData.stream().max(Comparator.comparingDouble(CurrencyData::getMaximum)).get().getMaximum();
             double valueMin = visibleData.stream().min(Comparator.comparingDouble(CurrencyData::getMinimum)).get().getMinimum();
 
@@ -105,10 +104,6 @@ public class PlotPanel extends JPanel{
 
             final int topBottomPadding = 10;
             double yscale = (getHeight() - 2*topBottomPadding) / (valueMax - valueMin);
-
-            time = System.nanoTime() - time;
-            Log.d(this, "Precalculations " + time + "ns");
-            time = System.nanoTime();
 
             for(int i = 0; i < visibleData.size(); ++i){
                 CurrencyData data = visibleData.get(i);
@@ -134,9 +129,6 @@ public class PlotPanel extends JPanel{
                 g2d.setColor(candleColor);
                 g2d.drawLine(x + width / 2 - 1, minimumY, x + width / 2 - 1, maximumY);
             }
-
-            time = System.nanoTime() - time;
-            Log.d(this, visibleData.size() + " visible data drawings " + time + "ns");
         }
     }
 }

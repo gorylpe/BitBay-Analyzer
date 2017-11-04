@@ -42,7 +42,7 @@ public class MainFrame extends JFrame implements ActionListener{
         menuBar.add(viewsMenu);
         add(menuBar, BorderLayout.PAGE_START);
 
-        add(BitBayController.INSTANCE.getRootPanel(), BorderLayout.CENTER);
+        add(BitBayController.INSTANCE.getWindowRootPanel(), BorderLayout.CENTER);
 
         setVisible(true);
         pack();
