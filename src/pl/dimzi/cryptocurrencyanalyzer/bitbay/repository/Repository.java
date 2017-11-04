@@ -1,6 +1,7 @@
 package pl.dimzi.cryptocurrencyanalyzer.bitbay.repository;
 
 import pl.dimzi.cryptocurrencyanalyzer.Log;
+import pl.dimzi.cryptocurrencyanalyzer.bitbay.model.TradeBlock;
 import pl.dimzi.cryptocurrencyanalyzer.model.CurrencyData;
 import pl.dimzi.cryptocurrencyanalyzer.bitbay.model.Trade;
 import pl.dimzi.cryptocurrencyanalyzer.bitbay.enums.TradeType;
@@ -9,6 +10,7 @@ import pl.dimzi.cryptocurrencyanalyzer.DatabaseConnection;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Repository {
@@ -39,6 +41,12 @@ public class Repository {
                         "amount DOUBLE, " +
                         "type VARCHAR(10))";
                 statement.execute(createTrades);
+
+                String createBlocks = "CREATE TABLE IF NOT EXISTS " + type.getTradeBlocksTableName() + " (" +
+                        "dateStart DATETIME, " +
+                        "dateEnd DATETIME," +
+                        "UNIQUE(dateStart, dateEnd));";
+                statement.execute(createBlocks);
 
                 Period[] periodTypes = Period.values();
 
@@ -82,6 +90,136 @@ public class Repository {
             conn.setAutoCommit(true);
             connLock.unlock();
         }
+
+        mergeTradesBlocksWithNewTrades(trades, type);
+    }
+
+    private void mergeTradesBlocksWithNewTrades(ArrayList<Trade> trades, TradeType type) throws SQLException{
+        Long minDate = trades.stream().min(Comparator.comparingLong(Trade::getUnixTimestamp)).get().getUnixTimestamp();
+        Long maxDate = trades.stream().max(Comparator.comparingLong(Trade::getUnixTimestamp)).get().getUnixTimestamp();
+
+        ArrayList<TradeBlock> tradeBlocksEndingInNewBlock =
+                getTradeBlocksByDate(type, minDate, maxDate, " WHERE dateEnd >= ? AND dateEnd <= ?");
+
+        ArrayList<TradeBlock> tradeBlocksStartingInNewBlock =
+                getTradeBlocksByDate(type, minDate, maxDate, " WHERE dateStart >= ? AND dateStart <= ?");
+
+        StringBuilder builder = new StringBuilder();
+        for(TradeBlock block : tradeBlocksEndingInNewBlock){
+            builder.append("(").append(block.getDateStart()).append(", ").append(block.getDateEnd()).append(") ");
+        }
+        for(TradeBlock block : tradeBlocksStartingInNewBlock){
+            builder.append("(").append(block.getDateStart()).append(", ").append(block.getDateEnd()).append(") ");
+        }
+
+        Log.d(this, "Merging (" + minDate + ", " + maxDate + ") " + " with" + builder.toString());
+
+        Long newBlockMinDate = minDate;
+        for(TradeBlock block : tradeBlocksEndingInNewBlock){
+            if(block.getDateStart() < newBlockMinDate){
+                newBlockMinDate = block.getDateStart();
+            }
+        }
+
+        Long newBlockMaxDate = maxDate;
+        for(TradeBlock block : tradeBlocksStartingInNewBlock){
+            if(block.getDateEnd() > newBlockMaxDate){
+                newBlockMaxDate = block.getDateEnd();
+            }
+        }
+
+        removeTradeBlocksByDate(type, minDate, maxDate, " WHERE dateEnd >= ? AND dateEnd <= ?");
+        removeTradeBlocksByDate(type, minDate, maxDate, " WHERE dateStart >= ? AND dateStart <= ?");
+
+        String sql = "INSERT OR REPLACE INTO " + type.getTradeBlocksTableName() + " VALUES(?, ?)";
+        PreparedStatement statement = conn.prepareStatement(sql);
+        statement.setLong(1, minDate);
+        statement.setLong(2, maxDate);
+        connLock.lock();
+        try{
+            statement.execute();
+        } finally {
+            connLock.unlock();
+        }
+    }
+
+    private void removeTradeBlocksByDate(TradeType type, Long minDate, Long maxDate, String sqlParam) throws SQLException {
+        String sql;
+        PreparedStatement statement;
+
+        sql = "DELETE FROM " + type.getTradeBlocksTableName() + sqlParam;
+        statement = conn.prepareStatement(sql);
+        statement.setLong(1, minDate);
+        statement.setLong(2, maxDate);
+        connLock.lock();
+        try{
+            statement.execute();
+        } finally {
+            connLock.unlock();
+        }
+    }
+
+    private ArrayList<TradeBlock> getTradeBlocksByDate(TradeType type, long minDate, long maxDate, String sqlParam) throws SQLException{
+        ArrayList<TradeBlock> array = new ArrayList<>();
+
+        String sql;
+        PreparedStatement statement;
+        ResultSet resultSet;
+
+        sql = "SELECT * FROM " + type.getTradeBlocksTableName() + sqlParam;
+        statement = conn.prepareStatement(sql);
+        statement.setLong(1, minDate);
+        statement.setLong(2, maxDate);
+
+        connLock.lock();
+        try{
+            resultSet = statement.executeQuery();
+        } finally {
+            connLock.unlock();
+        }
+        while (resultSet.next()){
+            TradeBlock tradeBlock = new TradeBlock(resultSet.getLong(1), resultSet.getLong(2));
+            array.add(tradeBlock);
+        }
+
+        return array;
+    }
+
+    public void addCurrencyData(ArrayList<CurrencyData> datas, TradeType type, Period period) throws SQLException {
+        connLock.lock();
+        conn.setAutoCommit(false);
+        String sql = "INSERT OR REPLACE INTO " + type.getCurrencyDataTableName(period) + " VALUES (?, ?, ?, ?, ?, ?, ?)";
+        PreparedStatement preparedStatement = conn.prepareStatement(sql);
+        for (CurrencyData data : datas) {
+            preparedStatement.setTimestamp(1, new java.sql.Timestamp(data.getPeriodStart()));
+            preparedStatement.setDouble(2, data.getMinimum());
+            preparedStatement.setDouble(3, data.getMaximum());
+            preparedStatement.setDouble(4, data.getOpening());
+            preparedStatement.setDouble(5, data.getClosing());
+            preparedStatement.setDouble(6, data.getAverage());
+            preparedStatement.setDouble(7, data.getVolume());
+            preparedStatement.addBatch();
+        }
+        try {
+            preparedStatement.executeBatch();
+        } finally {
+            conn.setAutoCommit(true);
+            connLock.unlock();
+        }
+    }
+
+    public Trade getNewestTrade(TradeType type) throws SQLException{
+        ResultSet resultSet = conn.createStatement().executeQuery(
+                "SELECT * FROM " + type.getTradesTableName() + " ORDER BY tid DESC LIMIT 1");
+        Trade trade = new Trade();
+        if(resultSet.next()){
+            trade.setTid(resultSet.getLong(1));
+            trade.setDate(resultSet.getTimestamp(2).getTime());
+            trade.setPrice(resultSet.getDouble(3));
+            trade.setAmount(resultSet.getDouble(4));
+            trade.setType(resultSet.getString(5));
+        }
+        return trade;
     }
 
     public ArrayList<Trade> getTradesByDate(TradeType tradeType, Long from, Long to) throws SQLException{
@@ -111,43 +249,6 @@ public class Repository {
         }
 
         return trades;
-    }
-
-    public Trade getNewestTrade(TradeType type) throws SQLException{
-        ResultSet resultSet = conn.createStatement().executeQuery(
-                "SELECT * FROM " + type.getTradesTableName() + " ORDER BY tid DESC LIMIT 1");
-        Trade trade = new Trade();
-        if(resultSet.next()){
-            trade.setTid(resultSet.getLong(1));
-            trade.setDate(resultSet.getTimestamp(2).getTime());
-            trade.setPrice(resultSet.getDouble(3));
-            trade.setAmount(resultSet.getDouble(4));
-            trade.setType(resultSet.getString(5));
-        }
-        return trade;
-    }
-
-    public void addCurrencyData(ArrayList<CurrencyData> datas, TradeType type, Period period) throws SQLException {
-        connLock.lock();
-        conn.setAutoCommit(false);
-        String sql = "INSERT OR REPLACE INTO " + type.getCurrencyDataTableName(period) + " VALUES (?, ?, ?, ?, ?, ?, ?)";
-        PreparedStatement preparedStatement = conn.prepareStatement(sql);
-        for (CurrencyData data : datas) {
-            preparedStatement.setTimestamp(1, new java.sql.Timestamp(data.getPeriodStart()));
-            preparedStatement.setDouble(2, data.getMinimum());
-            preparedStatement.setDouble(3, data.getMaximum());
-            preparedStatement.setDouble(4, data.getOpening());
-            preparedStatement.setDouble(5, data.getClosing());
-            preparedStatement.setDouble(6, data.getAverage());
-            preparedStatement.setDouble(7, data.getVolume());
-            preparedStatement.addBatch();
-        }
-        try {
-            preparedStatement.executeBatch();
-        } finally {
-            conn.setAutoCommit(true);
-            connLock.unlock();
-        }
     }
 
     public ArrayList<CurrencyData> getCurrencyDataByDateToLast(TradeType type, Period period, Long from) throws SQLException{
