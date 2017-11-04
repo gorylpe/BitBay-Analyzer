@@ -1,8 +1,8 @@
-package main.java.pl.dimzi.cryptocurrencyanalyzer.bitbay.service;
+package pl.dimzi.cryptocurrencyanalyzer.bitbay.service;
 
-import main.java.pl.dimzi.cryptocurrencyanalyzer.Log;
-import main.java.pl.dimzi.cryptocurrencyanalyzer.bitbay.enums.TradeType;
-import main.java.pl.dimzi.cryptocurrencyanalyzer.bitbay.model.Trade;
+import pl.dimzi.cryptocurrencyanalyzer.Log;
+import pl.dimzi.cryptocurrencyanalyzer.bitbay.enums.TradeType;
+import pl.dimzi.cryptocurrencyanalyzer.bitbay.model.Trade;
 import com.google.gson.Gson;
 
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package main.java.pl.dimzi.cryptocurrencyanalyzer.model;
+package pl.dimzi.cryptocurrencyanalyzer.model;
 
 public class CurrencyData {
     private Long periodStart;

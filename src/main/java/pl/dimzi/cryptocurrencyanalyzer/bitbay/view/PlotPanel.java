@@ -1,9 +1,9 @@
-package main.java.pl.dimzi.cryptocurrencyanalyzer.bitbay.view;
+package pl.dimzi.cryptocurrencyanalyzer.bitbay.view;
 
-import main.java.pl.dimzi.cryptocurrencyanalyzer.Log;
-import main.java.pl.dimzi.cryptocurrencyanalyzer.bitbay.enums.TradeType;
-import main.java.pl.dimzi.cryptocurrencyanalyzer.enums.Period;
-import main.java.pl.dimzi.cryptocurrencyanalyzer.model.CurrencyData;
+import pl.dimzi.cryptocurrencyanalyzer.Log;
+import pl.dimzi.cryptocurrencyanalyzer.bitbay.enums.TradeType;
+import pl.dimzi.cryptocurrencyanalyzer.enums.Period;
+import pl.dimzi.cryptocurrencyanalyzer.model.CurrencyData;
 
 import javax.swing.*;
 import java.awt.*;

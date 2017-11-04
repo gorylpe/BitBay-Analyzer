@@ -1,4 +1,4 @@
-package main.java.pl.dimzi.cryptocurrencyanalyzer.bitbay.model;
+package pl.dimzi.cryptocurrencyanalyzer.bitbay.model;
 
 public class TradeBlock {
     Long dateStart;

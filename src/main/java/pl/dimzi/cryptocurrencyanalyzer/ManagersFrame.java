@@ -1,6 +1,6 @@
-package main.java.pl.dimzi.cryptocurrencyanalyzer;
+package pl.dimzi.cryptocurrencyanalyzer;
 
-import main.java.pl.dimzi.cryptocurrencyanalyzer.view.ManagerPanel;
+import pl.dimzi.cryptocurrencyanalyzer.view.ManagerPanel;
 
 import javax.swing.*;
 

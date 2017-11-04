@@ -1,4 +1,4 @@
-package main.java.pl.dimzi.cryptocurrencyanalyzer;
+package pl.dimzi.cryptocurrencyanalyzer;
 
 public class Log {
     private static boolean debug = false;

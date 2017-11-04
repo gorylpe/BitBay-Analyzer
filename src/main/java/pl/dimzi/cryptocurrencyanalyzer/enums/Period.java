@@ -1,4 +1,4 @@
-package main.java.pl.dimzi.cryptocurrencyanalyzer.enums;
+package pl.dimzi.cryptocurrencyanalyzer.enums;
 
 public enum Period {
     DAILY(24 * 60 * 60),

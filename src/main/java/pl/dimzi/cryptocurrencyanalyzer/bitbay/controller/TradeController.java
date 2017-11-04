@@ -1,10 +1,10 @@
-package main.java.pl.dimzi.cryptocurrencyanalyzer.bitbay.controller;
+package pl.dimzi.cryptocurrencyanalyzer.bitbay.controller;
 
-import main.java.pl.dimzi.cryptocurrencyanalyzer.Log;
-import main.java.pl.dimzi.cryptocurrencyanalyzer.bitbay.enums.TradeType;
-import main.java.pl.dimzi.cryptocurrencyanalyzer.bitbay.model.Trade;
-import main.java.pl.dimzi.cryptocurrencyanalyzer.bitbay.service.ConnectionService;
-import main.java.pl.dimzi.cryptocurrencyanalyzer.bitbay.repository.Repository;
+import pl.dimzi.cryptocurrencyanalyzer.Log;
+import pl.dimzi.cryptocurrencyanalyzer.bitbay.enums.TradeType;
+import pl.dimzi.cryptocurrencyanalyzer.bitbay.model.Trade;
+import pl.dimzi.cryptocurrencyanalyzer.bitbay.service.ConnectionService;
+import pl.dimzi.cryptocurrencyanalyzer.bitbay.repository.Repository;
 
 import java.sql.SQLException;
 import java.util.ArrayList;

@@ -1,7 +1,7 @@
-package main.java.pl.dimzi.cryptocurrencyanalyzer.bitbay.enums;
+package pl.dimzi.cryptocurrencyanalyzer.bitbay.enums;
 
 
-import main.java.pl.dimzi.cryptocurrencyanalyzer.enums.Period;
+import pl.dimzi.cryptocurrencyanalyzer.enums.Period;
 
 public enum TradeType {
     ETHPLN("ETH", "PLN");

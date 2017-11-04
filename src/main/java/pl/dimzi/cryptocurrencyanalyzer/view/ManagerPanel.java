@@ -1,4 +1,4 @@
-package main.java.pl.dimzi.cryptocurrencyanalyzer.view;
+package pl.dimzi.cryptocurrencyanalyzer.view;
 
 import javax.swing.*;
 import java.awt.*;
