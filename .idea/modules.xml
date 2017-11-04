@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/BitBay Analyzer.iml" filepath="$PROJECT_DIR$/BitBay Analyzer.iml" />
+      <module fileurl="file://$PROJECT_DIR$/CryptoCurrencyTechnicalAnalyzerMVC.iml" filepath="$PROJECT_DIR$/CryptoCurrencyTechnicalAnalyzerMVC.iml" />
     </modules>
   </component>
 </project>
