@@ -101,13 +101,13 @@ public class Repository {
         mergeTradesBlocksWithNewTrade(newTradeBlock, type);
     }
 
-    private void mergeTradesBlocksWithNewTrade(TradeBlock tradeBlock, TradeType type) throws SQLException{
+    private void mergeTradesBlocksWithNewTrade(TradeBlock newTradeBlock, TradeType type) throws SQLException{
 
         ArrayList<TradeBlock> tradeBlocksEndingInNewBlock =
-                getTradeBlocksByDate(type, tradeBlock.getDateStart(), tradeBlock.getDateEnd(), " WHERE dateEnd >= ? AND dateEnd <= ?");
+                getTradeBlocksByDate(type, newTradeBlock.getDateStart(), newTradeBlock.getDateEnd(), " WHERE dateEnd >= ? AND dateEnd <= ?");
 
         ArrayList<TradeBlock> tradeBlocksStartingInNewBlock =
-                getTradeBlocksByDate(type, tradeBlock.getDateStart(), tradeBlock.getDateEnd(), " WHERE dateStart >= ? AND dateStart <= ?");
+                getTradeBlocksByDate(type, newTradeBlock.getDateStart(), newTradeBlock.getDateEnd(), " WHERE dateStart >= ? AND dateStart <= ?");
 
         StringBuilder builder = new StringBuilder();
         for(TradeBlock block : tradeBlocksEndingInNewBlock){
@@ -117,24 +117,24 @@ public class Repository {
             builder.append("(").append(block.getDateStart()).append(", ").append(block.getDateEnd()).append(") ");
         }
 
-        Log.d(this, "Merging (" + tradeBlock.getDateStart() + ", " + tradeBlock.getDateEnd() + ") " + " with" + builder.toString());
+        Log.d(this, "Merging (" + newTradeBlock.getDateStart() + ", " + newTradeBlock.getDateEnd() + ") " + " with" + builder.toString());
 
-        Long newBlockDateStart = tradeBlock.getDateStart();
+        Long newBlockDateStart = newTradeBlock.getDateStart();
         for(TradeBlock block : tradeBlocksEndingInNewBlock){
             if(block.getDateStart() < newBlockDateStart){
                 newBlockDateStart = block.getDateStart();
             }
         }
 
-        Long newBlockDateEnd = tradeBlock.getDateEnd();
+        Long newBlockDateEnd = newTradeBlock.getDateEnd();
         for(TradeBlock block : tradeBlocksStartingInNewBlock){
             if(block.getDateEnd() > newBlockDateEnd){
                 newBlockDateEnd = block.getDateEnd();
             }
         }
 
-        removeTradeBlocksByDate(type, tradeBlock.getDateStart(), tradeBlock.getDateEnd(), " WHERE dateEnd >= ? AND dateEnd <= ?");
-        removeTradeBlocksByDate(type, tradeBlock.getDateStart(), tradeBlock.getDateEnd(), " WHERE dateStart >= ? AND dateStart <= ?");
+        removeTradeBlocksByDate(type, newTradeBlock.getDateStart(), newTradeBlock.getDateEnd(), " WHERE dateEnd >= ? AND dateEnd <= ?");
+        removeTradeBlocksByDate(type, newTradeBlock.getDateStart(), newTradeBlock.getDateEnd(), " WHERE dateStart >= ? AND dateStart <= ?");
 
         String sql = "INSERT OR REPLACE INTO " + type.getTradeBlocksTableName() + " VALUES(?, ?)";
         PreparedStatement statement = conn.prepareStatement(sql);
@@ -190,6 +190,29 @@ public class Repository {
         return array;
     }
 
+    public ArrayList<TradeBlock> getTradeBlocks(TradeType type) throws SQLException{
+        ArrayList<TradeBlock> array = new ArrayList<>();
+
+        String sql;
+        PreparedStatement statement;
+        ResultSet resultSet;
+
+        sql = "SELECT * FROM " + type.getTradeBlocksTableName();
+        statement = conn.prepareStatement(sql);
+        connLock.lock();
+        try{
+            resultSet = statement.executeQuery();
+        } finally {
+            connLock.unlock();
+        }
+        while (resultSet.next()){
+            TradeBlock tradeBlock = new TradeBlock(resultSet.getLong(1), resultSet.getLong(2));
+            array.add(tradeBlock);
+        }
+
+        return array;
+    }
+
     public void addCurrencyData(ArrayList<CurrencyData> datas, TradeType type, Period period) throws SQLException {
         connLock.lock();
         conn.setAutoCommit(false);
@@ -214,17 +237,33 @@ public class Repository {
     }
 
     public Trade getNewestTrade(TradeType type) throws SQLException{
-        ResultSet resultSet = conn.createStatement().executeQuery(
-                "SELECT * FROM " + type.getTradesTableName() + " ORDER BY tid DESC LIMIT 1");
-        Trade trade = new Trade();
-        if(resultSet.next()){
-            trade.setTid(resultSet.getLong(1));
-            trade.setDate(resultSet.getTimestamp(2).getTime());
-            trade.setPrice(resultSet.getDouble(3));
-            trade.setAmount(resultSet.getDouble(4));
-            trade.setType(resultSet.getString(5));
+        return getTradeAtDate(type, -1L);
+    }
+
+    private Trade getTradeAtDate(TradeType type, Long date) throws SQLException{
+        PreparedStatement statement;
+        if(date != -1L){
+            statement = conn.prepareStatement("SELECT * FROM " + type.getTradesTableName() + " WHERE date = ? LIMIT 1");
+            statement.setLong(1, date);
+        } else {
+            statement = conn.prepareStatement("SELECT * FROM " + type.getTradesTableName() + " ORDER BY date DESC LIMIT 1");
         }
-        return trade;
+        connLock.lock();
+        try {
+            Trade trade = new Trade();
+            ResultSet resultSet = statement.executeQuery();
+            if(resultSet.next()){
+                trade.setTid(resultSet.getLong(1));
+                trade.setDate(resultSet.getTimestamp(2).getTime());
+                trade.setPrice(resultSet.getDouble(3));
+                trade.setAmount(resultSet.getDouble(4));
+                trade.setType(resultSet.getString(5));
+                return trade;
+            }
+        }finally {
+            connLock.unlock();
+        }
+        return null;
     }
 
     public ArrayList<Trade> getTradesByDate(TradeType tradeType, Long from, Long to) throws SQLException{
@@ -254,14 +293,6 @@ public class Repository {
         }
 
         return trades;
-    }
-
-    public ArrayList<CurrencyData> getCurrencyDataByDateToLast(TradeType type, Period period, Long from) throws SQLException{
-        return getCurrencyDataByDate(type, period, from, -1L);
-    }
-
-    public ArrayList<CurrencyData> getCurrencyDataByDateFromFirst(TradeType type, Period period, Long to) throws SQLException{
-        return getCurrencyDataByDate(type, period, -1L, to);
     }
 
     public ArrayList<CurrencyData> getCurrencyDataAll(TradeType type, Period period) throws SQLException{
