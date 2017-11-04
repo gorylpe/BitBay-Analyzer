@@ -23,6 +23,10 @@ public enum Period {
         return timeToAddTo + periodLength * size;
     }
 
+    public long addPeriod(long timeToAddTo, double size){
+        return (long)(timeToAddTo + periodLength * size);
+    }
+
     public long floorToPeriodType(long time){
         return (time / periodLength) * periodLength;
     }
