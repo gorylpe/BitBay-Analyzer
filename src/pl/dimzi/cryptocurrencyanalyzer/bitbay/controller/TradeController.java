@@ -72,7 +72,7 @@ public class TradeController {
         long mid = (min + max) / 2;
         Trade midTrade = connectionService.getClosestNextTrade(type, mid);
 
-        while(min != mid && midTrade.getUnixTimestamp() != date){
+        while(min != mid && !midTrade.getUnixTimestamp().equals(date)){
             if(date > midTrade.getUnixTimestamp()){
                 min = mid;
             } else if(date < midTrade.getUnixTimestamp()){
