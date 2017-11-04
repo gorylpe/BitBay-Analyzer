@@ -1,18 +1,22 @@
 package pl.dimzi.cryptocurrencyanalyzer.bitbay.controller;
 
+import pl.dimzi.cryptocurrencyanalyzer.Log;
 import pl.dimzi.cryptocurrencyanalyzer.bitbay.enums.TradeType;
 import pl.dimzi.cryptocurrencyanalyzer.bitbay.view.PlotPanel;
 import pl.dimzi.cryptocurrencyanalyzer.enums.Period;
 import pl.dimzi.cryptocurrencyanalyzer.model.CurrencyData;
 
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseWheelEvent;
+import java.awt.event.*;
 import java.util.ArrayList;
 
-public class PlotController extends MouseAdapter {
+public class PlotController extends Thread implements MouseListener, MouseMotionListener, MouseWheelListener {
     private PlotPanel plot;
+
+    private final int frameLengthInMs = 10;
+    private boolean needsRepaint;
+    private boolean needsUpdateVisibleData;
+    private int framesLost = 0;
 
     private ArrayList<CurrencyData> currencyData;
     private Period period;
@@ -25,9 +29,7 @@ public class PlotController extends MouseAdapter {
 
     private final double dataRangeMin = 10;
     private final double dataRangeMax = 500;
-    private final double dataRangePercentChangeOnZoom = 1.2;
-
-    private final double partOfPeriodToDragAtOnePxDrag = 1.0 / 500;
+    private final double dataRangePercentChangeOnZoom = 1.25;
 
     private Point mouseLastPress;
     private Point mouseLastPosition;
@@ -39,23 +41,58 @@ public class PlotController extends MouseAdapter {
         plot.addMouseMotionListener(this);
     }
 
-    public void refreshCurrencyData(TradeType tradeType, Period period, ArrayList<CurrencyData> currencyData) {
+    @Override
+    public void run(){
+        while(!Thread.currentThread().isInterrupted()){
+            long time = System.currentTimeMillis();
+            if(needsUpdateVisibleData){
+                recalculateVisibleCurrencyData();
+                needsUpdateVisibleData = false;
+            }
+            if(needsRepaint){
+                if(plot.getRepainting()){
+                    ++framesLost;
+                    Log.d(this, "Choke, frames lost: " + framesLost);
+                } else {
+                    plot.setData(visibleData, dateStart, dateEnd);
+                    plot.setRepainting(true);
+                    needsRepaint = false;
+
+                    framesLost = 0;
+                }
+            }
+            try{
+                long sleepTime = frameLengthInMs - (System.currentTimeMillis() - time);
+                if(sleepTime > 0) Thread.sleep(sleepTime);
+            }catch(InterruptedException e){
+                Thread.currentThread().interrupt();
+                break;
+            }
+        }
+    }
+
+    public void changeCurrencyData(TradeType tradeType, Period period, ArrayList<CurrencyData> currencyData) {
         this.currencyData = currencyData;
         this.period = period;
 
         //TODO DEBUG VAL
         setDateStart(1508008000);
         setDateRange(30);
+        recalculateDateEnd();
+        recalculateVisibleCurrencyData();
 
-        plot.refreshVisibleCurrencyData(tradeType, period, visibleData);
-        plot.setDateRange(dateStart, dateEnd);
+        plot.changeDataType(tradeType, period);
+        plot.setData(visibleData, dateStart, dateEnd);
     }
 
     private void drag(double dx){
-        long dateShift = (long)(dx * partOfPeriodToDragAtOnePxDrag * dateRange * period.getPeriodLength());
+        //move date as same percent as screen x
+        long dateShift = (long)(dx * 1.0 / plot.getWidth() * dateRange * period.getPeriodLength());
         setDateStart(dateStart + dateShift);
-        plot.setDateRange(dateStart, dateEnd);
-        plot.setVisibleData(visibleData);
+        recalculateDateEnd();
+
+        needsRepaint = true;
+        needsUpdateVisibleData = true;
     }
 
     private void zoom(int scrollAmount) {
@@ -66,30 +103,26 @@ public class PlotController extends MouseAdapter {
             newDataRange = dataRangeMin;
         if(newDataRange > dataRangeMax)
             newDataRange = dataRangeMax;
+
         setDateRange(newDataRange);
+        recalculateDateEnd();
 
         final long newDateUnderMouse = getAboveWhichDateIsMouse();
         final long deltaDate = dateUnderMouse - newDateUnderMouse;
 
         setDateStart(dateStart + deltaDate);
+        recalculateDateEnd();
 
-        plot.setDateRange(dateStart, dateEnd);
-        plot.setVisibleData(visibleData);
+        needsRepaint = true;
+        needsUpdateVisibleData = true;
     }
 
     private void setDateStart(long dateStart){
         this.dateStart = dateStart;
-        updateDateEndAndVisibleCurrencyData();
     }
 
     private void setDateRange(double dateRange) {
         this.dateRange = dateRange;
-        updateDateEndAndVisibleCurrencyData();
-    }
-
-    private void updateDateEndAndVisibleCurrencyData(){
-        recalculateDateEnd();
-        recalculateVisibleCurrencyData();
     }
 
     private void recalculateDateEnd() {

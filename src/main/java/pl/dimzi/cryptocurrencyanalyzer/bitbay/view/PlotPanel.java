@@ -19,6 +19,8 @@ public class PlotPanel extends JPanel{
     private long dateStart;
     private long dateEnd;
 
+    private boolean repainting;
+
     private final Font dateFont = new Font("Arial", Font.ITALIC, 10);
 
     private final Color backgroundColor = Color.WHITE;
@@ -39,28 +41,26 @@ public class PlotPanel extends JPanel{
 
     /**
      * Sets data used to plotting.
-     * @param visibleData data array used to plotting.
      */
-    public void refreshVisibleCurrencyData(TradeType tradeType, Period period, ArrayList<CurrencyData> visibleData) {
-        Log.d(this, "Refreshing currency data");
+    public void changeDataType(TradeType tradeType, Period period) {
+        Log.d(this, "Change data type");
         this.tradeType = tradeType;
         this.period = period;
-        this.visibleData = visibleData;
-
-        Log.d(this, "New dates, start " + dateStart + " end " + dateEnd + " elements " + this.visibleData.size());
-
-        repaint();
     }
 
-    public void setDateRange(long dateStart, long dateEnd){
+    public void setData(ArrayList<CurrencyData> visibleData, long dateStart, long dateEnd){
         this.dateStart = dateStart;
         this.dateEnd = dateEnd;
+        this.visibleData = visibleData;
         repaint();
     }
 
-    public void setVisibleData(ArrayList<CurrencyData> visibleData){
-        this.visibleData = visibleData;
-        repaint();
+    public void setRepainting(boolean repainting){
+        this.repainting = repainting;
+    }
+
+    public boolean getRepainting(){
+        return repainting;
     }
 
     /**
@@ -70,6 +70,8 @@ public class PlotPanel extends JPanel{
     @Override
     public void paintComponent(Graphics g){
         super.paintComponent(g);
+
+        long time = System.nanoTime();
 
         Graphics2D g2d = (Graphics2D) g;
 
@@ -86,12 +88,15 @@ public class PlotPanel extends JPanel{
 
         if(visibleData != null)
             drawCandles(g2d);
+
+        repainting = false;
     }
 
     private void drawCandles(Graphics2D g2d){
         g2d.setStroke(new BasicStroke(1.5f));
 
         if(visibleData.size() > 0){
+            long time = System.nanoTime();
             double valueMax = visibleData.stream().max(Comparator.comparingDouble(CurrencyData::getMaximum)).get().getMaximum();
             double valueMin = visibleData.stream().min(Comparator.comparingDouble(CurrencyData::getMinimum)).get().getMinimum();
 
@@ -100,6 +105,10 @@ public class PlotPanel extends JPanel{
 
             final int topBottomPadding = 10;
             double yscale = (getHeight() - 2*topBottomPadding) / (valueMax - valueMin);
+
+            time = System.nanoTime() - time;
+            Log.d(this, "Precalculations " + time + "ns");
+            time = System.nanoTime();
 
             for(int i = 0; i < visibleData.size(); ++i){
                 CurrencyData data = visibleData.get(i);
@@ -125,6 +134,9 @@ public class PlotPanel extends JPanel{
                 g2d.setColor(candleColor);
                 g2d.drawLine(x + width / 2 - 1, minimumY, x + width / 2 - 1, maximumY);
             }
+
+            time = System.nanoTime() - time;
+            Log.d(this, visibleData.size() + " visible data drawings " + time + "ns");
         }
     }
 }
