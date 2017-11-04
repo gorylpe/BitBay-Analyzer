@@ -27,6 +27,8 @@ public class PlotPanel extends JPanel{
     private long dateEnd;
     private int dateRange;
 
+    private final double partOfPeriodToDragAtOnePxDrag = 1.0 / 500;
+
     private final Font dateFont = new Font("Arial", Font.ITALIC, 10);
     private final Font valueFont = new Font("Arial", Font.BOLD, 12);
     private final Font textFont = new Font("Arial", Font.PLAIN, 12);
@@ -43,12 +45,8 @@ public class PlotPanel extends JPanel{
     /**
      * Initializes default values of plot panel.
      */
-    public PlotPanel(){
+    public PlotPanel() {
         super();
-
-        dateRange = 30;
-        //TODO DEBUG VAL
-        dateStart = 1509408000;
 
         currencyData = new ArrayList<>();
     }
@@ -63,11 +61,35 @@ public class PlotPanel extends JPanel{
         this.period = period;
         this.currencyData = currencyData;
 
-        dateEnd = period.addPeriod(dateStart, dateRange);
+        //TODO DEBUG VAL
+        setDateStart(1509408000);
+        setDateRange(30);
 
         Log.d(this, "New dates, start " + dateStart + " end " + dateEnd + " elements " + this.currencyData.size());
 
         repaint();
+    }
+
+    public void drag(double dx){
+        long dateShift = (long)(dx * partOfPeriodToDragAtOnePxDrag * dateRange * period.getPeriodLength());
+        Log.d(this, "" + dateShift);
+        setDateStart(dateStart + dateShift);
+    }
+
+    public void setDateStart(long dateStart){
+        this.dateStart = dateStart;
+        recalculateDateEnd();
+        repaint();
+    }
+
+    public void setDateRange(int dateRange) {
+        this.dateRange = dateRange;
+        recalculateDateEnd();
+        repaint();
+    }
+
+    private void recalculateDateEnd() {
+        dateEnd = period.addPeriod(dateStart, dateRange);
     }
 
     /**
@@ -121,8 +143,6 @@ public class PlotPanel extends JPanel{
             final int topBottomPadding = 10;
             double yscale = (getHeight() - 2*topBottomPadding) / (valueMax - valueMin);
 
-            Log.d(this, "valueMin = " + valueMin + "; valueMax = " + valueMax + "; yscale = " + yscale);
-
             for(int i = 0; i < visible.size(); ++i){
                 CurrencyData data = visible.get(i);
 
@@ -135,9 +155,6 @@ public class PlotPanel extends JPanel{
                 final int openingY = (int)((valueMax - data.getOpening()) * yscale) + topBottomPadding;
                 final int y = increase ? closingY : openingY;
                 final int height = Math.max(Math.abs(closingY - openingY), 1);
-
-                Log.d(this, "x = " + x + ";" + " y = " + y + ";");
-                Log.d(this, "closingY = " + closingY + ";" + " openingY = " + openingY + ";");
 
                 Color candleColor = increase ? candleIncreaseColor : candleDecreaseColor;
 
