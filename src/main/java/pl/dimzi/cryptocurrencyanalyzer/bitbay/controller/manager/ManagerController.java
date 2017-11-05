@@ -14,6 +14,7 @@ public class ManagerController implements ActionListener{
 
     private ManagerPanel managerPanel;
 
+    //TODO - map to have controller for every type of trade
     private TradeBlocksController tradeBlocksController;
 
 
@@ -23,6 +24,14 @@ public class ManagerController implements ActionListener{
         managerPanel = new ManagerPanel();
 
         tradeBlocksController = new TradeBlocksController(managerPanel.getTradeBlocksPanel());
+    }
+
+    public void start(){
+        tradeBlocksController.start();
+    }
+
+    public void stop(){
+        tradeBlocksController.interrupt();
     }
 
     public void refreshTradeBlocks(ArrayList<TradeBlock> tradeBlocks){
