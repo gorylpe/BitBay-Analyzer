@@ -52,6 +52,8 @@ public class PlotPanel extends JPanel{
         this.dateStart = dateStart;
         this.dateEnd = dateEnd;
         this.visibleData = visibleData;
+
+        setRepainting(true);
         repaint();
     }
 

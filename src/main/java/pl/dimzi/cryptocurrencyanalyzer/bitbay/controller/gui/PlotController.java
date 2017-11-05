@@ -56,7 +56,6 @@ public class PlotController extends Thread implements MouseListener, MouseMotion
                     Log.d(this, "Choke, frames lost: " + framesLost);
                 } else {
                     plot.setData(visibleData, dateStart, dateEnd);
-                    plot.setRepainting(true);
                     needsRepaint = false;
 
                     framesLost = 0;
