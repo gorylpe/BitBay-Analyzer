@@ -5,8 +5,9 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 
 public class ManagerPanel extends JPanel{
-    JLabel logo;
-    TradeBlocksPanel tradeBlocksPanel;
+    private Font logoFont;
+    private JLabel logo;
+    private TradeBlocksPanel tradeBlocksPanel;
 
     public ManagerPanel(){
         super();
@@ -18,6 +19,9 @@ public class ManagerPanel extends JPanel{
 
         logo = new JLabel("BitBay");
         logo.setPreferredSize(new Dimension(200 ,200));
+        logo.setHorizontalAlignment(SwingConstants.CENTER);
+        logoFont = new Font("Arial", Font.BOLD, 40);
+        logo.setFont(logoFont);
         c.gridx = 0;
         c.gridy = 0;
         c.weightx = 0;
@@ -32,6 +36,9 @@ public class ManagerPanel extends JPanel{
         c.weighty = 0;
 
         add(tradeBlocksPanel, c);
+
+        setVisible(true);
+        repaint();
     }
 
     public TradeBlocksPanel getTradeBlocksPanel() {
