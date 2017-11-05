@@ -44,6 +44,8 @@ public enum BitBayController implements ActionListener{
             tradeController = new TradeController(repo, connectionService);
             currencyDataController = new CurrencyDataController(repo);
             windowController = new WindowController();
+            //TODO DEBUG ONLY ETHPLN, ADD OTHERS
+            managerController.refreshTradeBlocks(repo.getTradeBlocks(TradeType.ETHPLN));
         }catch (SQLException e){
             Log.e(this, e.getMessage());
         }
