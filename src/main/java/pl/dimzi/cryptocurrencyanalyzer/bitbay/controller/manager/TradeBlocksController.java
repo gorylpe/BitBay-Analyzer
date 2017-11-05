@@ -14,7 +14,7 @@ public class TradeBlocksController extends Thread implements MouseListener, Mous
 
     private TradeBlocksPanel tradeBlocksPanel;
 
-    private final int frameLengthInMs = 50;
+    private final int frameLengthInMs = 20;
     private boolean needsRepaint;
     private boolean needsUpdateVisibleData;
     private int framesLost = 0;
@@ -37,6 +37,9 @@ public class TradeBlocksController extends Thread implements MouseListener, Mous
 
     public TradeBlocksController(TradeBlocksPanel tradeBlocksPanel) {
         this.tradeBlocksPanel = tradeBlocksPanel;
+        tradeBlocksPanel.addMouseListener(this);
+        tradeBlocksPanel.addMouseMotionListener(this);
+        tradeBlocksPanel.addMouseWheelListener(this);
 
         //watch in daily scale
         period = Period.DAILY;
@@ -56,7 +59,6 @@ public class TradeBlocksController extends Thread implements MouseListener, Mous
                     Log.d(this, "Choke, frames lost: " + framesLost);
                 } else {
                     tradeBlocksPanel.setData(visibleData, dateStart, dateEnd);
-                    tradeBlocksPanel.setRepainting(true);
                     needsRepaint = false;
 
                     framesLost = 0;
@@ -74,6 +76,15 @@ public class TradeBlocksController extends Thread implements MouseListener, Mous
 
     public void refreshTradeBlocks(ArrayList<TradeBlock> data) {
         this.data = data;
+
+        //TODO ADD RESETTING AND STAY ON LAST POS
+        long dataDateStart = data.get(0).getDateStart();
+        setDateStart(dataDateStart);
+        setDateRange(80);
+        recalculateDateEnd();
+        recalculateVisibleTradeBlocks();
+
+        tradeBlocksPanel.setData(visibleData, dateStart, dateEnd);
     }
 
     private void drag(double dx){
@@ -104,8 +115,6 @@ public class TradeBlocksController extends Thread implements MouseListener, Mous
         setDateStart(dateStart + deltaDate);
         recalculateDateEnd();
 
-        Log.d(this, dateRange + "");
-
         needsRepaint = true;
         needsUpdateVisibleData = true;
     }
@@ -129,7 +138,7 @@ public class TradeBlocksController extends Thread implements MouseListener, Mous
         final long visibleDateEnd = dateEnd;
         for(int i = 0; i < data.size(); ++i){
             TradeBlock block = data.get(i);
-            if(block.getDateEnd() > visibleDateStart && block.getDateEnd() < visibleDateEnd){
+            if(block.getDateEnd() >= visibleDateStart && block.getDateStart() <= visibleDateEnd){
                 visibleData.add(block);
             }
         }
